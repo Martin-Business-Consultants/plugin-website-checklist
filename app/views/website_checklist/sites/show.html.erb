@@ -1,0 +1,138 @@
+<% @page_title = @site.name %>
+<% summary = @site.summary %>
+
+<% content_for :header do %>
+  <%= parent_page "Websites", website_checklist_sites_path %>
+<% end %>
+
+<section class="settings settings--split">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions">
+        <% if @site.cms_linked? %>
+          <%= button_to website_checklist_site_sync_path(@site), class: "btn btn--circle-mobile" do %>
+            <%= icon_tag "refresh" %>
+            <span>Read the CMS</span>
+          <% end %>
+        <% end %>
+        <% if can?(:manage_websites) %>
+          <%= link_to edit_website_checklist_site_path(@site), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+            <%= icon_tag "pencil" %>
+            <span>Edit</span>
+            <kbd class="hide-on-touch">E</kbd>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @site.sync_error.present? %>
+      <div class="website-checklist-alert txt-small" role="status">
+        <strong>Some of the CMS couldn't be read</strong>
+        <div class="website-checklist-value"><%= @site.sync_error %></div>
+      </div>
+    <% end %>
+
+    <% website_item_groups(@items).each do |group, items| %>
+      <%# herb:key group %>
+      <section class="settings__section">
+        <header>
+          <h2 class="divider"><%= group %></h2>
+        </header>
+        <ul class="website-checklist-items">
+          <% items.each do |item| %>
+            <%# herb:key item.id %>
+            <li id="item_<%= item.id %>" class="website-checklist-item" data-filter-target="item">
+              <div class="website-checklist-item__head">
+                <div class="website-checklist-item__title">
+                  <strong><%= item.title %></strong>
+                  <% if item.subject.present? %>
+                    <span class="txt-subtle">· <%= item.subject %></span>
+                  <% end %>
+                </div>
+                <%= website_item_state_tag item %>
+              </div>
+              <% if item.detail.present? %>
+                <p class="txt-x-small txt-subtle margin-none"><%= item.detail %></p>
+              <% end %>
+              <dl class="record-facts txt-small">
+                <dt><%= item.detected? && @site.cms_linked? ? "The CMS says" : "Value" %></dt>
+                <dd class="website-checklist-value"><%= item.value.presence || "Not recorded" %></dd>
+                <% if item.confirmed_value.present? && item.value.to_s != item.confirmed_value.to_s %>
+                  <dt>Was confirmed as</dt>
+                  <dd class="website-checklist-value"><%= item.confirmed_value %></dd>
+                <% end %>
+                <% if item.note.present? %>
+                  <dt>Note</dt>
+                  <dd class="website-checklist-value"><%= item.note %></dd>
+                <% end %>
+                <% if item.confirmed_at && item.settled? || item.changed? %>
+                  <dt><%= item.not_applicable? ? "Marked by" : "Confirmed by" %></dt>
+                  <dd><%= item.confirmed_by_name %>, <%= l item.confirmed_at.to_date, format: :long %></dd>
+                <% end %>
+              </dl>
+              <% if item.problem.present? %>
+                <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> <%= item.problem %></p>
+              <% end %>
+              <div class="website-checklist-item__actions txt-small">
+                <% unless item.confirmed? %>
+                  <%= button_to "Confirm", website_checklist_site_item_confirmation_path(@site, item), class: "btn btn--link txt-small" %>
+                <% end %>
+                <% if item.settled? || item.changed? %>
+                  <%= button_to "Reopen", website_checklist_site_item_confirmation_path(@site, item), method: :delete, class: "btn txt-small" %>
+                <% end %>
+                <% unless item.not_applicable? %>
+                  <%= button_to "Not applicable", website_checklist_site_item_not_applicable_path(@site, item), class: "btn btn--plain txt-small" %>
+                <% end %>
+                <%= link_to (item.value_editable? ? "Record" : "Note"), edit_website_checklist_site_item_path(@site, item), class: "btn btn--plain txt-small" %>
+                <% if item.href.present? %>
+                  <%= link_to "Open in the CMS", item.href, class: "txt-link", target: "_blank", rel: "noopener" %>
+                <% end %>
+                <% if item.custom? %>
+                  <%= render "layouts/shared/delete_dialog", name: "“#{item.title}”", path: website_checklist_site_item_path(@site, item), trigger_class: "txt-small" %>
+                <% end %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  </div>
+
+  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
+    <%= render "layouts/shared/sidebar_toggle" %>
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Details</h2>
+      </header>
+      <dl class="record-facts">
+        <dt><%= term(:client) %></dt><dd><%= link_to @site.client.name, client_path(@site.client, tab: "plugin-website_checklist"), class: "txt-link" %></dd>
+        <dt>Address</dt><dd><%= @site.url ? link_to(@site.host, @site.url, class: "txt-link", target: "_blank", rel: "noopener") : "Not set" %></dd>
+        <dt>Checklist</dt><dd><%= website_summary_tag @site, summary %></dd>
+        <% if (attention = website_attention_text(@site, summary)) %>
+          <dt>Needs a look</dt><dd><%= attention %></dd>
+        <% end %>
+        <dt>Kept</dt>
+        <dd>
+          <% if @site.cms_linked? %>
+            From <%= link_to URI.parse(@site.cms_url).host, @site.cms_url, class: "txt-link", target: "_blank", rel: "noopener" %>,
+            <%= @site.synced_at ? "read #{time_ago_in_words(@site.synced_at)} ago" : "not read yet" %>
+          <% else %>
+            By hand
+          <% end %>
+        </dd>
+      </dl>
+    </section>
+
+    <section class="settings__section flex flex-column gap-half">
+      <header>
+        <h2 class="divider">Add an item</h2>
+      </header>
+      <%= form_with url: website_checklist_site_items_path(@site), scope: :item, class: "flex flex-column gap-half txt-small" do |form| %>
+        <%= form.text_field :title, class: "input full-width", placeholder: "What to check", required: true, maxlength: 200, autocomplete: "off", aria: { label: "What to check" } %>
+        <%= form.text_field :value, class: "input full-width", placeholder: "Its value, if you know it", autocomplete: "off", aria: { label: "Value" } %>
+        <button type="submit" class="btn txt-small">Add</button>
+      <% end %>
+    </section>
+  </aside>
+</section>

@@ -1,0 +1,12 @@
+<% @page_title = "Edit #{@site.name}" %>
+
+<% content_for :header do %>
+  <%= parent_page @site.name, website_checklist_site_path(@site) %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "website_checklist/sites/form", site: @site %>
+  </div>
+</section>

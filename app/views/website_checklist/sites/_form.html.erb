@@ -1,0 +1,41 @@
+<%# locals: (site:) %>
+<%= render "layouts/shared/errors", record: site %>
+
+<%= form_with model: site, url: site.new_record? ? website_checklist_sites_path : website_checklist_site_path(site), scope: :site, class: "record-form", data: { controller: "form", action: "keydown.esc->form#cancel" } do |form| %>
+  <% if site.new_record? %>
+    <label class="record-form__field">
+      <span class="record-form__label"><%= term(:client) %></span>
+      <%= form.select :client_id, website_client_options, { include_blank: "Choose…" }, class: "input input--select full-width", required: true %>
+    </label>
+  <% end %>
+
+  <div class="record-form__row">
+    <label class="record-form__field">
+      <span class="record-form__label">Name</span>
+      <%= form.text_field :name, class: "input full-width", autofocus: site.new_record?, autocomplete: "off", placeholder: "Main site", required: true %>
+    </label>
+    <label class="record-form__field">
+      <span class="record-form__label">Address</span>
+      <%= form.url_field :url, class: "input full-width", autocomplete: "off", placeholder: "https://example.com" %>
+    </label>
+  </div>
+
+  <label class="record-form__field">
+    <span class="record-form__label">CMS</span>
+    <%= form.url_field :cms_url, class: "input full-width", autocomplete: "off", placeholder: "https://example.librepublish.com" %>
+    <span class="record-form__hint">Optional. The LibrePublish CMS that runs the site: its sender, forms, webhooks and sitemap are read into the checklist. Blank keeps the checklist by hand.</span>
+  </label>
+
+  <label class="record-form__field">
+    <span class="record-form__label">CMS token</span>
+    <%= secret_field form, :cms_token, placeholder: "From the CMS's Settings › API tokens" %>
+    <span class="record-form__hint">A token that can read settings, forms and webhooks (settings:read, forms:read, webhooks:read). Whatever it can't read is said on the checklist.</span>
+  </label>
+
+  <div class="record-form__footer">
+    <%= link_to "Cancel", site.new_record? ? website_checklist_sites_path : website_checklist_site_path(site), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
+    <button type="submit" class="btn btn--link" data-form-target="submit">
+      <span><%= site.new_record? ? "Add website" : "Save changes" %></span>
+    </button>
+  </div>
+<% end %>

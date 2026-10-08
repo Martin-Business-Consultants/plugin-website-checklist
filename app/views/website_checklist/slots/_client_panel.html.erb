@@ -1,0 +1,31 @@
+<%# locals: (client:) %>
+<%# A tab on each client page (the :client_panel slot): the client's websites and their checklists. Its first heading is hidden: the tab names it. %>
+<section class="settings__section flex flex-column gap-half">
+  <h2 class="divider">Websites</h2>
+  <% sites = client.website_checklist_sites.ordered.includes(:items).to_a %>
+  <% if sites.any? %>
+    <ul class="website-checklist-sites">
+      <% sites.each do |site| %>
+        <%# herb:key site.id %>
+        <% summary = site.summary %>
+        <li class="website-checklist-site">
+          <div class="website-checklist-item__title">
+            <%= link_to site.name, website_checklist_site_path(site), class: "txt-link" %>
+            <span class="txt-small txt-subtle"><%= site.host %></span>
+          </div>
+          <%= website_summary_tag site, summary %>
+          <% if (attention = website_attention_text(site, summary)) %>
+            <span class="txt-x-small txt-subtle"><%= attention %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="txt-small txt-subtle margin-none">No websites yet: add one to keep how it's set up (form emails, webhooks, sitemap, sign-off) in one place.</p>
+  <% end %>
+  <% if can?(:manage_websites) %>
+    <div>
+      <%= link_to "Add a website", new_website_checklist_site_path(client_id: client.id), class: "btn txt-small" %>
+    </div>
+  <% end %>
+</section>

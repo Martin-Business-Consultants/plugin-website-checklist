@@ -1,0 +1,70 @@
+/* Linked on every page while Website checklist is on (Runwell::Plugins.stylesheet). Runwell's
+   design tokens (docs/theming.md), so themes reach these too. */
+@layer components {
+  .website-checklist-items,
+  .website-checklist-sites {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+    list-style: none;
+    margin: var(--block-space) 0 0;
+    padding: 0;
+  }
+
+  .website-checklist-item {
+    border-block-end: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    padding-block-end: var(--block-space);
+  }
+
+  .website-checklist-item:last-child {
+    border-block-end: none;
+  }
+
+  .website-checklist-item__head {
+    align-items: start;
+    display: flex;
+    gap: var(--inline-space);
+    justify-content: space-between;
+  }
+
+  .website-checklist-item__title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--inline-space-half);
+    min-inline-size: 0;
+  }
+
+  .website-checklist-item__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half);
+  }
+
+  .website-checklist-site {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half) var(--inline-space);
+  }
+
+  .website-checklist-value {
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  .website-checklist-problem {
+    color: var(--color-negative);
+  }
+
+  .website-checklist-alert {
+    border: 1px solid var(--color-negative);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    color: var(--color-negative);
+    margin-block-end: var(--block-space);
+    padding: var(--block-space-half) var(--inline-space);
+  }
+}

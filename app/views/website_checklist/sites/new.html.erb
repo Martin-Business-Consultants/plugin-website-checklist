@@ -1,0 +1,12 @@
+<% @page_title = "Add a website" %>
+
+<% content_for :header do %>
+  <%= parent_page "Websites", website_checklist_sites_path %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <%= render "website_checklist/sites/form", site: @site %>
+  </div>
+</section>
