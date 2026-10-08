@@ -11,10 +11,10 @@ Runwell 2.21 or newer.
 
 ## Install
 
-Settings › Plugins › Install, with `Martin-Business-Consultants/runwell-website-checklist`, or from
+Settings › Plugins › Install, with `Martin-Business-Consultants/plugin-website-checklist`, or from
 the shell:
 
-    bin/rails "plugins:install[Martin-Business-Consultants/runwell-website-checklist]"
+    bin/rails "plugins:install[Martin-Business-Consultants/plugin-website-checklist]"
 
 Then switch it on in Settings › Plugins. Remove deletes its code and keeps its tables.
 
@@ -73,17 +73,17 @@ workflow.
 
 Clone it beside a Runwell checkout, then from Runwell:
 
-    bin/rails "plugins:link[../runwell-website-checklist]"
+    bin/rails "plugins:link[../plugin-website-checklist]"
     bin/rails db:migrate
     bin/dev
 
 Its tests run from the Runwell checkout (Runwell's own suite doesn't load plugins; the plugin's
 `test/test_helper.rb` loads it and adds its tables to the test database):
 
-    bin/rails test ../runwell-website-checklist/test
+    bin/rails test ../plugin-website-checklist/test
 
-`bin/rails agent:coverage`, `bundle exec herb lint ../runwell-website-checklist/app/views` and
-`bin/rubocop ../runwell-website-checklist` should all be clean.
+`bin/rails agent:coverage`, `bundle exec herb lint ../plugin-website-checklist/app/views` and
+`bin/rubocop ../plugin-website-checklist` should all be clean.
 
 ## Releasing
 

@@ -33,7 +33,7 @@ module WebsiteChecklist
     config.to_prepare do
       Runwell::Plugins.register :website_checklist, name: "Websites", version: WebsiteChecklist::VERSION,
         author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.21.0",
-        homepage: "https://github.com/Martin-Business-Consultants/runwell-website-checklist",
+        homepage: "https://github.com/Martin-Business-Consultants/plugin-website-checklist",
         description: "Every client's websites, each with a checklist of how it's set up (who form emails go to and " \
                      "come from, what the confirmation says, webhooks, the sitemap sent to search engines, sign-off), " \
                      "confirmed by a person. A site run by the CMS fills in what it can tell, and flags what changed."
