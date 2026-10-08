@@ -47,7 +47,7 @@ module WebsiteChecklist
       applicable = list.reject(&:not_applicable?)
       Summary.new(total: applicable.size, confirmed: applicable.count(&:confirmed?), changed: applicable.count(&:changed?),
         unconfirmed: applicable.count { it.state == "unconfirmed" }, not_applicable: list.size - applicable.size,
-        problems: applicable.count { it.problem.present? })
+        problems: applicable.count { it.problem.present? || it.differs_from_cms? })
     end
 
     def needs_attention? = sync_error.present? || !summary.ready?

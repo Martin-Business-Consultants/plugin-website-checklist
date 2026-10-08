@@ -56,8 +56,12 @@
                 <p class="txt-x-small txt-subtle margin-none"><%= item.detail %></p>
               <% end %>
               <dl class="record-facts txt-small">
-                <dt><%= item.detected? && @site.cms_linked? ? "The CMS says" : "Value" %></dt>
+                <dt>Value</dt>
                 <dd class="website-checklist-value"><%= item.value.presence || "Not recorded" %></dd>
+                <% if item.differs_from_cms? %>
+                  <dt>The CMS says</dt>
+                  <dd class="website-checklist-value"><%= item.detected_value.presence || "Nothing" %></dd>
+                <% end %>
                 <% if item.confirmed_value.present? && item.value.to_s != item.confirmed_value.to_s %>
                   <dt>Was confirmed as</dt>
                   <dd class="website-checklist-value"><%= item.confirmed_value %></dd>
@@ -74,6 +78,9 @@
               <% if item.problem.present? %>
                 <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> <%= item.problem %></p>
               <% end %>
+              <% if item.differs_from_cms? %>
+                <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> The CMS doesn't match: change it there, or edit the value here.</p>
+              <% end %>
               <div class="website-checklist-item__actions txt-small">
                 <% unless item.confirmed? %>
                   <%= button_to "Confirm", website_checklist_site_item_confirmation_path(@site, item), class: "btn btn--link txt-small" %>
@@ -84,7 +91,10 @@
                 <% unless item.not_applicable? %>
                   <%= button_to "Not applicable", website_checklist_site_item_not_applicable_path(@site, item), class: "btn btn--plain txt-small" %>
                 <% end %>
-                <%= link_to (item.value_editable? ? "Record" : "Note"), edit_website_checklist_site_item_path(@site, item), class: "btn btn--plain txt-small" %>
+                <%= link_to edit_website_checklist_site_item_path(@site, item), class: "btn txt-small" do %>
+                  <%= icon_tag "pencil" %>
+                  <span>Edit</span>
+                <% end %>
                 <% if item.href.present? %>
                   <%= link_to "Open in the CMS", item.href, class: "txt-link", target: "_blank", rel: "noopener" %>
                 <% end %>

@@ -39,7 +39,8 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
   and "Read the CMS" (and a nightly run) fills in what the CMS can tell: the from name and email,
   each published form's notification recipients, notification and confirmation wording (subject
   and a content fingerprint), where each form posts, the CMS's webhooks, the sitemap and the
-  domain. Those values are the CMS's and change there; the rest stay by hand. A confirmed value
+  domain. Every value can still be edited: until someone does, it follows the CMS; after, it's
+  what the site should be, and a CMS that says otherwise is flagged (editing doesn't change the CMS). A confirmed value
   the CMS no longer matches shows as **Changed**, and problems the CMS shows (a notification
   switched off, a sender off the site's domain, a failing webhook, no HTTPS) are flagged. Each
   item links to where it's set in the CMS.

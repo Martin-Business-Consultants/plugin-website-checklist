@@ -12,6 +12,7 @@ json.checklist summary.to_h
 json.items @items do |item|
   json.extract! item, :id, :key, :group, :subject, :title, :detail, :kind, :value, :confirmed_value, :state, :problem, :note,
     :confirmed_by_name, :confirmed_at, :custom
-  json.value_editable item.value_editable?
+  json.cms_says item.detected_value if item.detected? && @site.cms_linked?
+  json.differs_from_cms item.differs_from_cms?
   json.cms_href item.href
 end

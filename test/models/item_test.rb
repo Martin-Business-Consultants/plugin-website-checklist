@@ -36,14 +36,28 @@ module WebsiteChecklist
       assert_nil @item.confirmed_by_name
     end
 
-    test "a value the CMS fills can't be written by hand" do
+    test "a value the CMS fills follows it until a person writes their own, then a CMS that differs is flagged" do
       @site.update!(cms_url: "https://cms.example", cms_token: "tok")
       @item.detect(value: "from the CMS")
-      @item.revise(value: "typed")
-      @item.confirm(by: users(:ted), value: "typed too")
+      assert_equal "from the CMS", @item.value
+      assert_not @item.differs_from_cms?
 
-      assert_equal "from the CMS", @item.reload.value
-      assert_equal "from the CMS", @item.confirmed_value
+      @item.detect(value: "the CMS changed it")
+      assert_equal "the CMS changed it", @item.reload.value, "untouched, it follows the CMS"
+
+      @item.revise(value: "what it should be")
+      @item.confirm(by: users(:ted))
+      assert_equal "what it should be", @item.reload.confirmed_value
+      assert @item.differs_from_cms?
+      assert_equal 1, @site.summary.problems
+
+      @item.detect(value: "the CMS changed it")
+      assert_equal "what it should be", @item.reload.value, "a person's value stays"
+      assert_equal "changed", @item.state
+
+      @item.detect(value: "what it should be")
+      assert_equal "confirmed", @item.reload.state
+      assert_not @item.differs_from_cms?
     end
 
     test "custom items go under Custom and only they can change their title" do

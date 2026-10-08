@@ -24,19 +24,14 @@
         </label>
       <% end %>
 
-      <% if @item.value_editable? %>
-        <label class="record-form__field">
-          <span class="record-form__label">Value</span>
-          <%= form.text_field :value, class: "input full-width", autofocus: true, autocomplete: "off" %>
-          <span class="record-form__hint">What is true now. A new value has to be confirmed again<%= @item.confirmed_value.present? ? " (it was confirmed as: #{@item.confirmed_value})" : "" %>.</span>
-        </label>
-      <% else %>
-        <div class="record-form__field">
-          <span class="record-form__label">The CMS says</span>
-          <div class="website-checklist-value txt-small"><%= @item.value.presence || "Nothing" %></div>
-          <span class="record-form__hint">Read from the CMS, so it changes there<%= link_to(" (open it)", @item.href, class: "txt-link", target: "_blank", rel: "noopener") if @item.href.present? %>.</span>
-        </div>
-      <% end %>
+      <label class="record-form__field">
+        <span class="record-form__label">Value</span>
+        <%= form.text_field :value, class: "input full-width", autofocus: true, autocomplete: "off" %>
+        <span class="record-form__hint">What is true now. A new value has to be confirmed again<%= @item.confirmed_value.present? ? " (it was confirmed as: #{@item.confirmed_value})" : "" %>.</span>
+        <% if @item.detected? && @site.cms_linked? %>
+          <span class="record-form__hint">The CMS says: <%= @item.detected_value.presence || "nothing" %>. Saving here doesn't change the CMS; if it says otherwise, the checklist flags it<%= link_to(" (open it in the CMS)", @item.href, class: "txt-link", target: "_blank", rel: "noopener") if @item.href.present? %>.</span>
+        <% end %>
+      </label>
 
       <label class="record-form__field">
         <span class="record-form__label">Note</span>

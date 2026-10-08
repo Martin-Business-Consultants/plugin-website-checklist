@@ -38,8 +38,9 @@ Read first, in Runwell's repository:
   checklist, made once per site; item keys are fixed once used (`sender:from_email`,
   `forms:<slug>:notification`, `custom:<hex>`).
 - `Item` holds the verbs: `confirm`, `mark_not_applicable`, `reopen`, `revise` (a person's
-  change; a new value is to confirm again) and `detect` (the CMS's value; a confirmed value it no
-  longer matches becomes `changed`, and back again `confirmed`). State is one of `unconfirmed`,
+  change; a new value is to confirm again) and `detect` (the CMS's value, kept in `detected_value`; `value`
+  follows it until a person writes their own, then `differs_from_cms?` flags a mismatch; a confirmed
+  value it no longer matches becomes `changed`, and back again `confirmed`). State is one of `unconfirmed`,
   `confirmed`, `changed`, `not_applicable`; `confirmed_value` is what was confirmed.
 - `Site::Syncable#sync_now` reads the CMS (`Site::CmsReading`, over `WebsiteChecklist::Cms`, a
   read-only Net::HTTP client with timeouts) and never raises: what failed goes in `sync_error`.

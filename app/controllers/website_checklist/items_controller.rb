@@ -5,7 +5,7 @@ module WebsiteChecklist
       description: "An item of your own, beyond the standard checklist (it goes under Custom): what to check, and its value if known.",
       params: { item: { title: "string!", detail: "string", value: "string", note: "string" } }, next_tools: %i[confirm_website_item]
     agent_tool :update_website_item, on: :update, title: "Record a website checklist item's value",
-      description: "The item's value (what is true now) and a note. A new value has to be confirmed again; a value the CMS fills can't be written here. A custom item's title and detail can change too.",
+      description: "The item's value (what is true now) and a note. A new value has to be confirmed again. On a site the CMS runs, a value written here is what it should be: a CMS that says otherwise is flagged (this doesn't change the CMS). A custom item's title and detail can change too.",
       params: { item: { value: "string", note: "string", title: "string", detail: "string" } }, next_tools: %i[confirm_website_item]
     agent_tool :delete_website_item, on: :destroy, title: "Remove a custom item from a website's checklist",
       description: "Only items added beyond the standard checklist can be removed; mark the others not applicable."
