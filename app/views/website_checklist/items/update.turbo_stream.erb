@@ -1,0 +1,6 @@
+<%# A save on the site's page: the item whole, its group's count and the site's checklist count. %>
+<%= turbo_stream.replace dom_id(@item), partial: "website_checklist/sites/item", locals: { item: @item, site: @site } %>
+<%= turbo_stream.replace dom_id(@site, "group_#{@item.group.parameterize(separator: "_")}"), partial: "website_checklist/sites/group_summary",
+      locals: { site: @site, group: @item.group, items: @site.items.where(group: @item.group).to_a } %>
+<%= turbo_stream.replace dom_id(@site, :checklist_summary), partial: "website_checklist/sites/checklist_summary",
+      locals: { site: @site, summary: @site.summary } %>

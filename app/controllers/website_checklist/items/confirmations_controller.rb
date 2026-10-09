@@ -13,7 +13,7 @@ module WebsiteChecklist
       def create
         attributes = params.fetch(:item, {}).permit(:value, :note).to_h.symbolize_keys
         if @item.confirm(by: Current.user, **attributes)
-          redirect_to website_checklist_site_path(@site, anchor: "item_#{@item.id}"), notice: "Confirmed “#{@item.title}”."
+          redirect_to website_checklist_site_path(@site, anchor: helpers.dom_id(@item)), notice: "Confirmed “#{@item.title}”."
         else
           redirect_to website_checklist_site_path(@site), alert: @item.errors.full_messages.to_sentence
         end
@@ -21,7 +21,7 @@ module WebsiteChecklist
 
       def destroy
         @item.reopen
-        redirect_to website_checklist_site_path(@site, anchor: "item_#{@item.id}"), notice: "“#{@item.title}” is to confirm again."
+        redirect_to website_checklist_site_path(@site, anchor: helpers.dom_id(@item)), notice: "“#{@item.title}” is to confirm again."
       end
     end
   end

@@ -45,6 +45,16 @@ module WebsiteChecklist
       assert_response :success
       assert_includes response.body, "Sitemap submitted to Google Search Console"
       assert_includes response.body, "Admin notification goes to (to and CCs)"
+      assert_select "details.website-checklist-group", count: response.body.scan("website-checklist-group ").size
+      assert_select "details.website-checklist-group[open]", 1
+      assert_select "a[href=?][title='Open all']", website_checklist_site_path(@site, open: "all")
+      assert_select "turbo-frame[id^='value_website_checklist_item_'] a.website-checklist-editable"
+      assert_select "dialog textarea[name='item[note]']"
+      assert_select "form[action$='/confirmation']", count: 0
+      assert_select "form[action$='/not_applicable']", count: 0
+
+      get website_checklist_site_path(@site, open: "all")
+      assert_select "details.website-checklist-group:not([open])", 0
 
       get website_checklist_site_path(@site, format: :json)
       body = response.parsed_body

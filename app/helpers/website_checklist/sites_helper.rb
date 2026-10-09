@@ -32,6 +32,15 @@ module WebsiteChecklist
       (Item::GROUPS & grouped.keys).map { [ it, grouped[it] ] } + (grouped.keys - Item::GROUPS).map { [ it, grouped[it] ] }
     end
 
+    # A group's items in a few words, on its accordion: "3 of 4 confirmed · 1 changed".
+    def website_group_summary(items)
+      applicable = items.reject(&:not_applicable?)
+      parts = [ "#{applicable.count(&:confirmed?)} of #{applicable.size} confirmed" ]
+      changed = applicable.count(&:changed?)
+      parts << "#{changed} changed" if changed.positive?
+      parts.join(" · ")
+    end
+
     def website_client_options = Client.ordered.pluck(:name, :id)
   end
 end

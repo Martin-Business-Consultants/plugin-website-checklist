@@ -1,0 +1,3 @@
+<%# locals: (site:, group:, items:) %>
+<%# A group's count on its accordion, replaced when one of its items is saved. %>
+<span id="<%= dom_id(site, "group_#{group.parameterize(separator: "_")}") %>" class="txt-x-small txt-subtle"><%= website_group_summary(items) %></span>

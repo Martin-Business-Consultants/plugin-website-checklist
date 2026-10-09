@@ -10,6 +10,17 @@
     <div class="page-heading">
       <h1 class="page-title"><%= @page_title %></h1>
       <div class="page-heading__actions">
+        <% if @open_all %>
+          <%= link_to website_checklist_site_path(@site), class: "btn btn--circle", title: "Close all but the first" do %>
+            <%= icon_tag "collapse" %>
+            <span class="for-screen-reader">Close all but the first</span>
+          <% end %>
+        <% else %>
+          <%= link_to website_checklist_site_path(@site, open: "all"), class: "btn btn--circle", title: "Open all" do %>
+            <%= icon_tag "expand" %>
+            <span class="for-screen-reader">Open all</span>
+          <% end %>
+        <% end %>
         <% if @site.cms_linked? %>
           <%= button_to website_checklist_site_sync_path(@site), class: "btn btn--circle-mobile" do %>
             <%= icon_tag "refresh" %>
@@ -33,79 +44,23 @@
       </div>
     <% end %>
 
-    <% website_item_groups(@items).each do |group, items| %>
+    <% groups = website_item_groups(@items) %>
+
+    <% groups.each_with_index do |(group, items), index| %>
       <%# herb:key group %>
-      <section class="settings__section">
-        <header>
+      <%= tag.details class: "website-checklist-group settings__section", open: @open_all || index.zero? do %>
+        <summary class="website-checklist-group__summary">
+          <%= icon_tag "caret-down", class: "website-checklist-group__caret" %>
           <h2 class="divider"><%= group %></h2>
-        </header>
+          <%= render "website_checklist/sites/group_summary", site: @site, group: group, items: items %>
+        </summary>
         <ul class="website-checklist-items">
           <% items.each do |item| %>
             <%# herb:key item.id %>
-            <li id="item_<%= item.id %>" class="website-checklist-item" data-filter-target="item">
-              <div class="website-checklist-item__head">
-                <div class="website-checklist-item__title">
-                  <strong><%= item.title %></strong>
-                  <% if item.subject.present? %>
-                    <span class="txt-subtle">· <%= item.subject %></span>
-                  <% end %>
-                </div>
-                <%= website_item_state_tag item %>
-              </div>
-              <% if item.detail.present? %>
-                <p class="txt-x-small txt-subtle margin-none"><%= item.detail %></p>
-              <% end %>
-              <dl class="record-facts txt-small">
-                <dt>Value</dt>
-                <dd class="website-checklist-value"><%= item.value.presence || "Not recorded" %></dd>
-                <% if item.differs_from_cms? %>
-                  <dt>The CMS says</dt>
-                  <dd class="website-checklist-value"><%= item.detected_value.presence || "Nothing" %></dd>
-                <% end %>
-                <% if item.confirmed_value.present? && item.value.to_s != item.confirmed_value.to_s %>
-                  <dt>Was confirmed as</dt>
-                  <dd class="website-checklist-value"><%= item.confirmed_value %></dd>
-                <% end %>
-                <% if item.note.present? %>
-                  <dt>Note</dt>
-                  <dd class="website-checklist-value"><%= item.note %></dd>
-                <% end %>
-                <% if item.confirmed_at && item.settled? || item.changed? %>
-                  <dt><%= item.not_applicable? ? "Marked by" : "Confirmed by" %></dt>
-                  <dd><%= item.confirmed_by_name %>, <%= l item.confirmed_at.to_date, format: :long %></dd>
-                <% end %>
-              </dl>
-              <% if item.problem.present? %>
-                <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> <%= item.problem %></p>
-              <% end %>
-              <% if item.differs_from_cms? %>
-                <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> The CMS doesn't match: change it there, or edit the value here.</p>
-              <% end %>
-              <div class="website-checklist-item__actions txt-small">
-                <% unless item.confirmed? %>
-                  <%= button_to "Confirm", website_checklist_site_item_confirmation_path(@site, item), class: "btn btn--link txt-small" %>
-                <% end %>
-                <% if item.settled? || item.changed? %>
-                  <%= button_to "Reopen", website_checklist_site_item_confirmation_path(@site, item), method: :delete, class: "btn txt-small" %>
-                <% end %>
-                <% unless item.not_applicable? %>
-                  <%= button_to "Not applicable", website_checklist_site_item_not_applicable_path(@site, item), class: "btn btn--plain txt-small" %>
-                <% end %>
-                <%= link_to edit_website_checklist_site_item_path(@site, item), class: "btn txt-small" do %>
-                  <%= icon_tag "pencil" %>
-                  <span>Edit</span>
-                <% end %>
-                <% if item.href.present? %>
-                  <%= link_to "Open in the CMS", item.href, class: "txt-link", target: "_blank", rel: "noopener" %>
-                <% end %>
-                <% if item.custom? %>
-                  <%= render "layouts/shared/delete_dialog", name: "“#{item.title}”", path: website_checklist_site_item_path(@site, item), trigger_class: "txt-small" %>
-                <% end %>
-              </div>
-            </li>
+            <%= render "website_checklist/sites/item", item: item, site: @site %>
           <% end %>
         </ul>
-      </section>
+      <% end %>
     <% end %>
   </div>
 
@@ -118,10 +73,7 @@
       <dl class="record-facts">
         <dt><%= term(:client) %></dt><dd><%= link_to @site.client.name, client_path(@site.client, tab: "plugin-website_checklist"), class: "txt-link" %></dd>
         <dt>Address</dt><dd><%= @site.url ? link_to(@site.host, @site.url, class: "txt-link", target: "_blank", rel: "noopener") : "Not set" %></dd>
-        <dt>Checklist</dt><dd><%= website_summary_tag @site, summary %></dd>
-        <% if (attention = website_attention_text(@site, summary)) %>
-          <dt>Needs a look</dt><dd><%= attention %></dd>
-        <% end %>
+        <%= render "website_checklist/sites/checklist_summary", site: @site, summary: summary %>
         <dt>Kept</dt>
         <dd>
           <% if @site.cms_linked? %>

@@ -1,0 +1,8 @@
+<%# locals: (item:, site:) %>
+<%# An item's value, shown: click it to edit it in place (items/value). %>
+<%= turbo_frame_tag dom_id(item, :value) do %>
+  <%= link_to edit_website_checklist_site_item_path(site, item), class: class_names("website-checklist-editable website-checklist-value", "txt-subtle": item.value.blank?), title: "Click to edit" do %>
+    <span><%= item.value.presence || "Not recorded" %></span>
+    <%= icon_tag "pencil" %>
+  <% end %>
+<% end %>

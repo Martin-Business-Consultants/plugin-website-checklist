@@ -44,8 +44,8 @@ module WebsiteChecklist
       Runwell::Plugins.nightly :website_checklist, -> { WebsiteChecklist::Site.sync_all_later }
       Runwell::Plugins.agent_workflow :website_checklist, "Checking a client's website", <<~STEPS
         1. `list_websites` (show: attention) for the sites with something to confirm, a change or a problem; `show_website` for one's checklist.
-        2. `sync_website` on a site run by the CMS to read what it says now; items it fills can't be written by hand.
-        3. `update_website_item` to record what's true (who the notification goes to, when the sitemap went to Google), then `confirm_website_item` once checked; `mark_website_item_not_applicable` for what the site doesn't need.
+        2. `sync_website` on a site run by the CMS to read what it says now; a value written by hand is what it should be, and a CMS that says otherwise is flagged.
+        3. `update_website_item` to record what's true (who the notification goes to, when the sitemap went to Google): saving a value confirms it as yours, and `confirm_website_item` confirms one as it stands; `mark_website_item_not_applicable` for what the site doesn't need.
         4. A changed item means the CMS no longer matches what was confirmed: find out which is right, then confirm it again or fix the CMS.
       STEPS
     end

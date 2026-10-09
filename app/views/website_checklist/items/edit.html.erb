@@ -1,7 +1,7 @@
 <% @page_title = @item.title %>
 
 <% content_for :header do %>
-  <%= parent_page @site.name, website_checklist_site_path(@site, anchor: "item_#{@item.id}") %>
+  <%= parent_page @site.name, website_checklist_site_path(@site, anchor: dom_id(@item)) %>
 <% end %>
 
 <section class="settings">
@@ -27,7 +27,7 @@
       <label class="record-form__field">
         <span class="record-form__label">Value</span>
         <%= form.text_field :value, class: "input full-width", autofocus: true, autocomplete: "off" %>
-        <span class="record-form__hint">What is true now. A new value has to be confirmed again<%= @item.confirmed_value.present? ? " (it was confirmed as: #{@item.confirmed_value})" : "" %>.</span>
+        <span class="record-form__hint">What is true now. Saving confirms it as yours<%= @item.confirmed_value.present? ? " (it was confirmed as: #{@item.confirmed_value})" : "" %>.</span>
         <% if @item.detected? && @site.cms_linked? %>
           <span class="record-form__hint">The CMS says: <%= @item.detected_value.presence || "nothing" %>. Saving here doesn't change the CMS; if it says otherwise, the checklist flags it<%= link_to(" (open it in the CMS)", @item.href, class: "txt-link", target: "_blank", rel: "noopener") if @item.href.present? %>.</span>
         <% end %>
@@ -39,7 +39,7 @@
       </label>
 
       <div class="record-form__footer">
-        <%= link_to "Cancel", website_checklist_site_path(@site, anchor: "item_#{@item.id}"), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
+        <%= link_to "Cancel", website_checklist_site_path(@site, anchor: dom_id(@item)), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
         <button type="submit" class="btn btn--link" data-form-target="submit">
           <span>Save</span>
         </button>

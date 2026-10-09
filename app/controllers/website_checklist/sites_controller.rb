@@ -32,6 +32,7 @@ module WebsiteChecklist
 
     def show
       @items = @site.items.to_a
+      @open_all = params[:open] == "all"
     end
 
     def new

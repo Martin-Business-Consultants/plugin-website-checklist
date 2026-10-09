@@ -10,7 +10,7 @@ module WebsiteChecklist
 
       def create
         @item.mark_not_applicable(by: Current.user, **params.fetch(:item, {}).permit(:note).to_h.symbolize_keys)
-        redirect_to website_checklist_site_path(@site, anchor: "item_#{@item.id}"), notice: "“#{@item.title}” marked not applicable."
+        redirect_to website_checklist_site_path(@site, anchor: helpers.dom_id(@item)), notice: "“#{@item.title}” marked not applicable."
       end
     end
   end

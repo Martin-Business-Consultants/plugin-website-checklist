@@ -62,6 +62,12 @@ module WebsiteChecklist
       save
     end
 
+    # A person saying what's true: the value (and any note) saved and confirmed as theirs, or
+    # an empty value back to confirm.
+    def record(attributes, by:)
+      revise(attributes) && (value.present? ? confirm(by: by) : reopen)
+    end
+
     # What the CMS says now (Site#sync_now). The value follows it until a person writes their own.
     # A confirmed value it no longer matches is changed; one that comes back to it is confirmed again.
     def detect(value:, problem: nil, href: nil, detail: nil)

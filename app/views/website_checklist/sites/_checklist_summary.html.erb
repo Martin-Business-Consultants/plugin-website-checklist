@@ -1,0 +1,8 @@
+<%# locals: (site:, summary:) %>
+<%# The site's checklist count in its Details, replaced when an item is saved. %>
+<div id="<%= dom_id(site, :checklist_summary) %>" class="display-contents">
+  <dt>Checklist</dt><dd><%= website_summary_tag site, summary %></dd>
+  <% if (attention = website_attention_text(site, summary)) %>
+    <dt>Needs a look</dt><dd><%= attention %></dd>
+  <% end %>
+</div>

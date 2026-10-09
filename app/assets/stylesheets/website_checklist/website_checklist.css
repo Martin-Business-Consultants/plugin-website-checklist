@@ -67,4 +67,71 @@
     margin-block-end: var(--block-space);
     padding: var(--block-space-half) var(--inline-space);
   }
+
+  .website-checklist-group__summary {
+    align-items: baseline;
+    cursor: pointer;
+    display: flex;
+    gap: var(--inline-space);
+    list-style: none;
+  }
+
+  .website-checklist-group__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .website-checklist-group__summary .divider {
+    flex: 1;
+  }
+
+  .website-checklist-group__summary {
+    align-items: center;
+  }
+
+  .website-checklist-group__caret {
+    color: var(--color-ink-medium);
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .website-checklist-group[open] > .website-checklist-group__summary .website-checklist-group__caret {
+    transform: none;
+  }
+
+  .website-checklist-editable {
+    align-items: baseline;
+    border-radius: calc(0.25rem * var(--radius-scale, 1));
+    color: inherit;
+    display: inline-flex;
+    gap: var(--inline-space-half);
+    margin-inline: calc(var(--inline-space-half) * -1);
+    padding-inline: var(--inline-space-half);
+    text-decoration: underline dotted var(--color-ink-light);
+    text-underline-offset: 0.25em;
+  }
+
+  .website-checklist-editable .icon {
+    opacity: 0;
+  }
+
+  .website-checklist-editable:hover,
+  .website-checklist-editable:focus-visible {
+    background: var(--color-ink-lightest);
+  }
+
+  .website-checklist-editable:hover .icon,
+  .website-checklist-editable:focus-visible .icon {
+    opacity: 0.6;
+  }
+
+  .website-checklist-inline-form {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half);
+  }
+
+  .website-checklist-inline-form .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 }
