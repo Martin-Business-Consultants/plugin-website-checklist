@@ -39,12 +39,14 @@ module WebsiteChecklist
 
     config.to_prepare do
       Runwell::Plugins.register :website_checklist, name: "Websites", version: WebsiteChecklist::VERSION,
-        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.25.0",
+        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.24.0",
         homepage: "https://github.com/Martin-Business-Consultants/plugin-website-checklist",
         description: "Every client's websites, each with a step-by-step checklist to take it live: access to the " \
                      "domain, DNS, Search Console and Analytics first, then forms and email, launch and after launch, " \
                      "each recorded and confirmed by a person."
-      Runwell::Plugins.nav :website_checklist, "Websites", -> { website_checklist_sites_path }, icon: "world"
+      # icon: arrived in Runwell 2.25; an older core would refuse it and fail to boot.
+      nav_icon = Runwell::Plugins.method(:nav).parameters.any? { |_, name| name == :icon } ? { icon: "world" } : {}
+      Runwell::Plugins.nav :website_checklist, "Websites", -> { website_checklist_sites_path }, **nav_icon
       Runwell::Plugins.permission :website_checklist, :manage_websites, name: "Add, change and delete websites", roles: %w[owner manager]
       Runwell::Plugins.stylesheet :website_checklist, "website_checklist/website_checklist"
       Runwell::Plugins.slot :client_panel, :website_checklist, "website_checklist/slots/client_panel"
