@@ -1,11 +1,11 @@
 <%# locals: (item:, site:, step:, current:) %>
-<%# One step in the checklist's list: its number, its state as a dot. Picking it shows it on the
+<%# One step in the checklist's list: its number, its state (a dot, or a green check once confirmed). Picking it shows it on the
     right (sites/_item); replaced by ItemsController#update's turbo stream. %>
-<%= link_to website_checklist_site_path(site, item: item.id), id: dom_id(item, :link), class: "scope-nav__item",
+<%= link_to website_checklist_site_path(site, item: item.id), id: dom_id(item, :link), class: class_names("scope-nav__item", "website-checklist-link--confirmed": item.confirmed?),
       aria: { current: ("page" if current) }, data: { turbo_frame: "website_checklist", turbo_action: "advance", filter_target: "item" } do %>
   <span class="scope-nav__name">
     <span class="website-checklist-step txt-x-small txt-subtle"><%= step %></span>
-    <%= tag.span class: "website-checklist-dot website-checklist-dot--#{item.state}", title: item.state_label %>
-    <span class="<%= class_names("overflow-ellipsis", "txt-subtle": item.settled?) %>" title="<%= item.title %>"><%= item.title %></span>
+    <%= website_item_marker item %>
+    <span class="<%= class_names("overflow-ellipsis", "txt-subtle": item.not_applicable?) %>" title="<%= item.title %>"><%= item.title %></span>
   </span>
 <% end %>

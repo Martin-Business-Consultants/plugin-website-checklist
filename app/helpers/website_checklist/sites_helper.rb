@@ -34,6 +34,21 @@ module WebsiteChecklist
       "#{applicable.count(&:confirmed?)} of #{applicable.size} done"
     end
 
+    # Every step in the group that applies is confirmed.
+    def website_group_done?(items)
+      applicable = items.reject(&:not_applicable?)
+      applicable.any? && applicable.all?(&:confirmed?)
+    end
+
+    # A step's state in the list: a green check once confirmed, else a dot.
+    def website_item_marker(item)
+      if item.confirmed?
+        tag.span icon_tag("check"), class: "website-checklist-check", title: item.state_label
+      else
+        tag.span class: "website-checklist-dot website-checklist-dot--#{item.state}", title: item.state_label
+      end
+    end
+
     def website_client_options = Client.ordered.pluck(:name, :id)
 
     # The Webhooks step's fields, inside the item's form: a repeater (the core's `repeater`
