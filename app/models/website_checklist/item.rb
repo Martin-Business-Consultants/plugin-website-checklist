@@ -17,6 +17,7 @@ module WebsiteChecklist
     has_many :webhooks, -> { ordered }, dependent: :delete_all, inverse_of: :item
     accepts_nested_attributes_for :webhooks, allow_destroy: true, reject_if: :blank_webhook?
     has_many :recommendations, dependent: :delete_all
+    has_many :todo_links, dependent: :delete_all
     has_many_attached :files
 
     validates :key, presence: true, uniqueness: { scope: :site_id }

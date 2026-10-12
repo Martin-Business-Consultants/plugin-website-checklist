@@ -13,6 +13,58 @@
       <div class="page-heading">
         <h1 class="page-title"><%= @page_title %></h1>
         <div class="page-heading__actions">
+          <% engagements = @site.client.engagements.open.order(created_at: :desc).to_a %>
+          <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+            <button type="button" class="btn btn--circle-mobile" data-action="dialog#open" title="Add <%= term(:work).downcase %> for <%= @site.client.name %>">
+              <%= icon_tag "board" %>
+              <span><%= term(:work) %></span>
+            </button>
+            <dialog class="dialog panel website-checklist-sheet website-checklist-sheet--narrow" data-dialog-target="dialog" aria-label="Add <%= term(:work).downcase %>">
+              <div class="website-checklist-sheet__bar">
+                <h2 class="dialog__title">Add <%= term(:work).downcase %> · <%= @site.client.name %></h2>
+                <button type="button" class="btn txt-small" data-action="dialog#close">Cancel</button>
+              </div>
+              <div class="website-checklist-sheet__content">
+                <% if engagements.empty? %>
+                  <p class="txt-small margin-none"><%= @site.client.name %> has no open <%= term(:engagement, count: 2).downcase %> to put <%= term(:work).downcase %> on. <%= link_to "Start one on their page", client_path(@site.client), class: "txt-link", data: { turbo_frame: "_top" } %>.</p>
+                <% else %>
+                  <%= form_with url: website_checklist_site_todos_path(@site), scope: :todo, class: "record-form", data: { controller: "form", turbo_frame: "_top" } do |form| %>
+                    <label class="record-form__field">
+                      <span class="record-form__label"><%= term(:engagement) %></span>
+                      <%= form.select :engagement_id, engagements.map { [ "#{it.ref} · #{it.title}", it.id ] }, {}, class: "input input--select full-width" %>
+                    </label>
+                    <label class="record-form__field">
+                      <span class="record-form__label">About</span>
+                      <%= form.select :item_id, website_item_groups(@items).flat_map(&:last).map { [ it.title, it.id ] }, { include_blank: "The website as a whole", selected: @item&.id }, class: "input input--select full-width" %>
+                    </label>
+                    <label class="record-form__field">
+                      <span class="record-form__label">What needs doing</span>
+                      <%= form.text_field :title, required: true, class: "input full-width", autocomplete: "off", placeholder: @item ? "e.g. Get #{@item.title.downcase} access from the client" : "What needs doing…" %>
+                    </label>
+                    <div class="record-form__field">
+                      <span class="record-form__label">Details</span>
+                      <%= rich_text_field form, :description, placeholder: "Optional. @ to mention someone. A link back to this step is added.", staff: true %>
+                    </div>
+                    <div class="record-form__row">
+                      <label class="record-form__field">
+                        <span class="record-form__label">Lead</span>
+                        <%= form.select :owner_id, User.active.people.ordered.map { [ it.display_name, it.id ] }, { include_blank: "Unassigned", selected: Current.user.person.id }, class: "input input--select full-width" %>
+                      </label>
+                      <label class="record-form__field">
+                        <span class="record-form__label">Due</span>
+                        <%= date_input form, :due_on, class: "input full-width" %>
+                      </label>
+                    </div>
+                    <div class="record-form__footer">
+                      <button type="submit" class="btn btn--link" data-form-target="submit">
+                        <span>Add <%= term(:work).downcase %></span>
+                      </button>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </dialog>
+          </div>
           <% if WebsiteChecklist::Scan.ai_available_for?(@site) %>
             <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
               <button type="button" class="btn btn--circle-mobile" data-action="dialog#open">

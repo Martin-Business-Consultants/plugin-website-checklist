@@ -17,12 +17,14 @@ module WebsiteChecklist
     before_destroy do
       Webhook.where(item_id: items.select(:id)).delete_all
       Recommendation.where(item_id: items.select(:id)).delete_all
+      todo_links.delete_all
       ActiveStorage::Attachment.where(record_type: Item.name, record_id: items.select(:id)).find_each(&:purge_later)
     end
 
     belongs_to :client
     has_many :items, -> { ordered }, dependent: :delete_all
     has_many :scans, dependent: :destroy
+    has_many :todo_links, dependent: :delete_all
 
     normalizes :url, with: ->(url) { url.strip.chomp("/").presence }
     normalizes :name, with: ->(name) { name.strip }

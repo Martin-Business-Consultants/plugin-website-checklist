@@ -60,5 +60,8 @@ Read first, in Runwell's repository:
   `Recommendation#approve!` records through `Item#record` as the approver and attaches the file;
   `reject!` leaves the step alone. The sheet is `scans/index` in a lazy frame inside a modal on
   the site's page; its Done link reloads the page.
+- Work from a site's page (`TodosController`): a core `Todo` made on one of the client's open
+  engagements through the model (`todo.created` recorded as the core does), linked by `TodoLink`
+  (site, optional step, todo id) and listed on the step; a todo deleted in the core drops out.
 - There is no CMS integration (removed in 0.3). The old CMS columns are ignored
   (`ignored_columns`) and dropped in a later release.

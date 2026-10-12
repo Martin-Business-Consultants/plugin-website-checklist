@@ -70,6 +70,25 @@
     </div>
   <% end %>
 
+  <% links = item.todo_links.includes(todo: :engagement).select(&:todo) %>
+  <section class="flex flex-column gap-half" aria-label="<%= term(:work) %>">
+    <span class="record-form__label txt-small"><%= term(:work) %></span>
+    <% if links.any? %>
+      <ul class="website-checklist-files txt-small">
+        <% links.each do |link| %>
+          <%# herb:key link.id %>
+          <li>
+            <%= status_tag link.todo.status.humanize %>
+            <%= link_to link.todo.title, todo_path(link.todo), class: "txt-link overflow-ellipsis", data: { turbo_frame: "_top" } %>
+            <span class="txt-x-small txt-subtle txt-nowrap"><%= link.todo.engagement.ref %><%= ", due #{l link.todo.due_on, format: :short}" if link.todo.due_on %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="txt-x-small txt-subtle margin-none">None yet: <%= term(:work) %> at the top of the page adds some for <%= site.client.name %>, about this step.</p>
+    <% end %>
+  </section>
+
   <section class="flex flex-column gap-half" aria-label="Files">
     <span class="record-form__label txt-small">Files</span>
     <% if item.files.attachments.any? %>
@@ -102,9 +121,9 @@
 
   <div class="website-checklist-item__actions txt-small">
     <% if item.not_applicable? %>
-      <%= button_to "It applies after all", website_checklist_site_item_confirmation_path(site, item), method: :delete, class: "btn btn--plain txt-small", form: { data: { turbo_frame: "_top" } } %>
+      <%= button_to "It applies after all", website_checklist_site_item_confirmation_path(site, item), method: :delete, class: "btn txt-small", form: { data: { turbo_frame: "_top" } } %>
     <% else %>
-      <%= button_to "Doesn't apply to this site", website_checklist_site_item_not_applicable_path(site, item), class: "btn btn--plain txt-small", form: { data: { turbo_frame: "_top" } } %>
+      <%= button_to "Doesn't apply to this site", website_checklist_site_item_not_applicable_path(site, item), class: "btn txt-small", form: { data: { turbo_frame: "_top" } } %>
     <% end %>
     <%= link_to "History", website_checklist_audits_path(site_id: site.id, item_id: item.id), class: "btn txt-small", data: { turbo_frame: "_top" } %>
     <% if item.custom? %>

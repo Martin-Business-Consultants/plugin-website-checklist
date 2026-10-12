@@ -11,6 +11,7 @@ module WebsiteChecklist
           resources :audits, only: :index, path: "websites/history"
           resources :sites, path: "websites" do
             resources :scans, only: %i[index create]
+            resources :todos, only: :create
             resources :recommendations, only: [] do
               resource :approval, only: :create, controller: "recommendations/approvals"
               resource :rejection, only: :create, controller: "recommendations/rejections"

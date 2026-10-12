@@ -40,7 +40,11 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
   following step. The page opens on the first step still to do.
 - **Webhooks** are recorded one by one, each folding open: its name, its URL, and the keys and
   values it's set up with (add and remove rows as you go).
-- **Files** on every step, beside its note: an export, a screenshot, the sitemap.
+- **Files** on every step, beside its note, in a drop box: drop files on it or choose them (an
+  export, a screenshot, the sitemap).
+- **Work** from the website's page: the button opens a sheet on the right to add a todo on one of
+  the client's open engagements, about the step on screen (or the site as a whole), with a lead,
+  a due date and details (with @mentions). It's linked back to the step, which lists its work.
 - **AI audit** (with the AI plugin on, 1.2 or newer): a sheet two-thirds of the window wide that
   takes the site's domain and finds out what it can from outside, without logging in anywhere:
   the registrar and when the domain renews (the registry's RDAP record), who hosts its DNS and
@@ -68,7 +72,7 @@ Every page has its tool: `list_websites`, `show_website` (each step with how to 
 next step), `create_website`, `update_website`, `delete_website`, `add_website_item`,
 `update_website_item` (`webhooks_attributes` for the Webhooks step), `delete_website_item`,
 `confirm_website_item`, `reopen_website_item`, `mark_website_item_not_applicable`,
-`add_website_item_file`, `remove_website_item_file`, `audit_website_with_ai`,
+`add_website_item_file`, `remove_website_item_file`, `add_website_work`, `audit_website_with_ai`,
 `show_website_ai_audit`, `approve_website_recommendation`, `reject_website_recommendation` and
 `website_history`. "Taking a
 client's website live" is offered to agents as a workflow.
