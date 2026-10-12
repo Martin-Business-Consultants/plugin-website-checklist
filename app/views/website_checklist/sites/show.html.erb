@@ -13,12 +13,6 @@
       <div class="page-heading">
         <h1 class="page-title"><%= @page_title %></h1>
         <div class="page-heading__actions">
-          <% if @site.cms_linked? %>
-            <%= button_to website_checklist_site_sync_path(@site), class: "btn btn--circle-mobile" do %>
-              <%= icon_tag "refresh" %>
-              <span>Read the CMS</span>
-            <% end %>
-          <% end %>
           <% if can?(:manage_websites) %>
             <%= link_to edit_website_checklist_site_path(@site), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
               <%= icon_tag "pencil" %>
@@ -35,22 +29,9 @@
         <% if @site.url %>
           <%= link_to @site.host, @site.url, class: "txt-link", target: "_blank", rel: "noopener" %>
         <% end %>
-        <span>
-          <% if @site.cms_linked? %>
-            From <%= link_to URI.parse(@site.cms_url).host, @site.cms_url, class: "txt-link", target: "_blank", rel: "noopener" %>,
-            <%= @site.synced_at ? "read #{time_ago_in_words(@site.synced_at)} ago" : "not read yet" %>
-          <% else %>
-            Kept by hand
-          <% end %>
-        </span>
       </div>
 
-      <% if @site.sync_error.present? %>
-        <div class="website-checklist-alert txt-small" role="status">
-          <strong>Some of the CMS couldn't be read</strong>
-          <div class="website-checklist-value"><%= @site.sync_error %></div>
-        </div>
-      <% end %>
+      <% steps = website_step_numbers(@items) %>
 
       <% website_item_groups(@items).each do |group, items| %>
         <%# herb:key group %>
@@ -62,7 +43,7 @@
           <nav class="scope-nav" aria-label="<%= group %>">
             <% items.each do |item| %>
               <%# herb:key item.id %>
-              <%= render "website_checklist/sites/item_link", item: item, site: @site, current: item == @item %>
+              <%= render "website_checklist/sites/item_link", item: item, site: @site, step: steps[item], current: item == @item %>
             <% end %>
           </nav>
         </section>
@@ -84,7 +65,7 @@
 
     <div id="website_checklist_detail" class="settings__panel panel shadow txt-align-start website-checklist-detail">
       <% if @item %>
-        <%= render "website_checklist/sites/item", item: @item, site: @site %>
+        <%= render "website_checklist/sites/item", item: @item, site: @site, step: steps[@item], total: @items.size, next_item: steps.keys[steps[@item]] %>
       <% else %>
         <p class="txt-small txt-subtle margin-none">Pick an item on the left to see and change it.</p>
       <% end %>

@@ -1,27 +1,27 @@
 module WebsiteChecklist
-  # One fact about how a website is set up: who a form's emails go to, what the confirmation
-  # says, whether the sitemap went to Google. A person writes its value, and on a site the CMS
-  # runs it starts as what the CMS says (`detected_value`) and follows it until a person writes
-  # their own. A person confirms it; what they confirmed is kept (`confirmed_value`), so a CMS
-  # that moves away from it shows as changed, and one that says other than the value is flagged.
+  # One step to take a website live: an access to get, a setting to record, a check to make. A
+  # person records its value and confirms it; what they confirmed is kept (`confirmed_value`), so
+  # a value changed later is to confirm again. The standard steps' guidance (`how`, `example`) is
+  # read from Site::Defaults.
   class Item < ApplicationRecord
-    GROUPS = [ "Email sender", "Forms", "Webhooks", "Search", "Launch", "Custom" ].freeze
-    STATES = %w[unconfirmed confirmed changed not_applicable].freeze
-    STATE_LABELS = { "unconfirmed" => "To confirm", "confirmed" => "Confirmed", "changed" => "Changed",
-                     "not_applicable" => "Not applicable" }.freeze
-    KINDS = %w[recorded detected].freeze
+    GROUPS = [ *Site::Defaults::GROUPS, "Custom" ].freeze
+    STATES = %w[unconfirmed confirmed not_applicable].freeze
+    STATE_LABELS = { "unconfirmed" => "To do", "confirmed" => "Confirmed", "not_applicable" => "Not applicable" }.freeze
+
+    # Left from reading a CMS (before 0.3); dropped in a later release.
+    self.ignored_columns += %w[kind detected_value detected_at problem href]
 
     belongs_to :site, touch: true
+    has_many :webhooks, -> { ordered }, dependent: :delete_all
+    accepts_nested_attributes_for :webhooks, allow_destroy: true, reject_if: :blank_webhook?
 
     validates :key, presence: true, uniqueness: { scope: :site_id }
     validates :title, :group, presence: true
     validates :state, inclusion: { in: STATES }
-    validates :kind, inclusion: { in: KINDS }
 
     normalizes :value, :note, with: ->(text) { text.strip.presence }
 
     scope :ordered, -> { order(:position, :id) }
-    scope :needing_attention, -> { where(state: %w[unconfirmed changed]).or(where.not(problem: nil)) }
 
     # An item of the team's own, beyond the standard checklist (Custom).
     def self.add_custom(site, title:, detail: nil, value: nil, note: nil)
@@ -30,14 +30,16 @@ module WebsiteChecklist
     end
 
     def state_label = STATE_LABELS.fetch(state)
-    def detected? = kind == "detected"
     def confirmed? = state == "confirmed"
-    def changed? = state == "changed"
     def not_applicable? = state == "not_applicable"
     def settled? = confirmed? || not_applicable?
 
-    # The CMS says other than the value a person holds to be true.
-    def differs_from_cms? = detected? && site.cms_linked? && detected_value.to_s != value.to_s
+    def how = Site::Defaults::BY_KEY.dig(key, :how)
+    def example = Site::Defaults::BY_KEY.dig(key, :example)
+
+    # The Webhooks step records each webhook (name, address, keys and values) rather than a line
+    # of text; its value is them, written out.
+    def webhooks? = key == "webhooks:integrations"
 
     # The value as it is now is the truth, as this person says.
     def confirm(by:, value: self.value, note: self.note)
@@ -56,8 +58,14 @@ module WebsiteChecklist
 
     # A person's change: a new value has to be confirmed again (what was confirmed stays, as "was").
     def revise(attributes)
-      attributes = attributes.to_h.symbolize_keys.slice(:value, :note, *(custom? ? %i[title detail] : []))
-      assign_attributes(attributes)
+      attributes = attributes.to_h.symbolize_keys
+      if webhooks? && attributes.key?(:webhooks_attributes)
+        self.webhooks_attributes = attributes[:webhooks_attributes]
+        kept = webhooks.reject(&:marked_for_destruction?)
+        kept.each_with_index { |webhook, index| webhook.position = index }
+        self.value = kept.map(&:to_s).join("\n")
+      end
+      assign_attributes(attributes.slice(:value, :note, *(custom? ? %i[title detail] : [])))
       self.state = "unconfirmed" if value_changed? && !not_applicable?
       save
     end
@@ -68,19 +76,9 @@ module WebsiteChecklist
       revise(attributes) && (value.present? ? confirm(by: by) : reopen)
     end
 
-    # What the CMS says now (Site#sync_now). The value follows it until a person writes their own.
-    # A confirmed value it no longer matches is changed; one that comes back to it is confirmed again.
-    def detect(value:, problem: nil, href: nil, detail: nil)
-      follows_cms = self.value.blank? || self.value.to_s == detected_value.to_s
-      assign_attributes(kind: "detected", detected_value: value, problem: problem, href: href, detected_at: Time.current)
-      self.value = value if follows_cms
-      self.detail = detail if detail
-      if confirmed? && detected_value.to_s != confirmed_value.to_s
-        self.state = "changed"
-      elsif changed? && detected_value.to_s == confirmed_value.to_s
-        self.state = "confirmed"
+    private
+      def blank_webhook?(attributes)
+        attributes["id"].blank? && attributes["name"].blank? && attributes["url"].blank?
       end
-      save!
-    end
   end
 end

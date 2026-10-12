@@ -34,16 +34,16 @@ Read first, in Runwell's repository:
 
 ## This plugin
 
-- `WebsiteChecklist::Site` (a client's website) has `Item`s. `Site::Defaults` is the standard
-  checklist, made once per site; item keys are fixed once used (`sender:from_email`,
-  `forms:<slug>:notification`, `custom:<hex>`).
+- `WebsiteChecklist::Site` (a client's website) has `Item`s: the steps to take it live.
+  `Site::Defaults` is the standard checklist, in order (access first), with each step's `how` and
+  `example`, read from code rather than stored. `Site#apply_standard_checklist` adds missing steps
+  and brings order and wording up to date (on create, and in a migration when the list changes).
+  Item keys are fixed once used (`access:dns`, `custom:<hex>`).
 - `Item` holds the verbs: `confirm`, `mark_not_applicable`, `reopen`, `revise` (a person's
-  change; a new value is to confirm again) and `detect` (the CMS's value, kept in `detected_value`; `value`
-  follows it until a person writes their own, then `differs_from_cms?` flags a mismatch; a confirmed
-  value it no longer matches becomes `changed`, and back again `confirmed`). State is one of `unconfirmed`,
-  `confirmed`, `changed`, `not_applicable`; `confirmed_value` is what was confirmed.
-- `Site::Syncable#sync_now` reads the CMS (`Site::CmsReading`, over `WebsiteChecklist::Cms`, a
-  read-only Net::HTTP client with timeouts) and never raises: what failed goes in `sync_error`.
-  Only read CMS endpoints that exist in the CMS's source; the list is in the README and at the
-  top of `Site::CmsReading`. Tests stand in for the CMS through `Cms.transport`.
-- `Site::SyncJob` is shallow; the nightly task queues one per CMS-linked site.
+  change; a new value is to confirm again) and `record` (save and confirm). State is one of
+  `unconfirmed`, `confirmed`, `not_applicable`; `confirmed_value` is what was confirmed.
+- The Webhooks step (`Item#webhooks?`) records `Webhook`s (name, url, `pairs` of keys and values)
+  through nested attributes; its value is them written out. The form is a repeater over the
+  core's `repeater` Stimulus controller, built in `SitesHelper` (partials can't render in a form).
+- There is no CMS integration (removed in 0.3). The old CMS columns are ignored
+  (`ignored_columns`) and dropped in a later release.

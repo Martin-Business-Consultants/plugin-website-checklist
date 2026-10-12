@@ -1,11 +1,12 @@
 module WebsiteChecklist
-  # A client's website and its checklist: the facts of how it's set up, each recorded and
-  # confirmed by a person. One run by the CMS also reads what the CMS can tell (Site::Syncable).
+  # A client's website and the checklist to take it live: what to gather and record, step by
+  # step, each recorded and confirmed by a person.
   class Site < ApplicationRecord
-    include Syncable
+    # Left from reading a CMS (before 0.3); dropped in a later release.
+    self.ignored_columns += %w[cms_url cms_token synced_at sync_error]
 
-    Summary = Data.define(:total, :confirmed, :changed, :unconfirmed, :not_applicable, :problems) do
-      def ready? = total.positive? && confirmed == total && problems.zero?
+    Summary = Data.define(:total, :confirmed, :unconfirmed, :not_applicable) do
+      def ready? = total.positive? && confirmed == total
       def to_h = super.merge(ready: ready?)
       def to_s = ready? ? "All #{total} confirmed" : "#{confirmed} of #{total} confirmed"
     end
@@ -13,20 +14,15 @@ module WebsiteChecklist
     belongs_to :client
     has_many :items, -> { ordered }, dependent: :delete_all
 
-    encrypts :cms_token
-
-    normalizes :url, :cms_url, with: ->(url) { url.strip.chomp("/").presence }
+    normalizes :url, with: ->(url) { url.strip.chomp("/").presence }
     normalizes :name, with: ->(name) { name.strip }
 
     validates :name, presence: true
-    validates :url, :cms_url, format: { with: %r{\Ahttps?://\S+\z}, message: "must start with http:// or https://" }, allow_nil: true
-    validates :cms_token, presence: { message: "is needed to read the CMS" }, if: :cms_linked?
+    validates :url, format: { with: %r{\Ahttps?://\S+\z}, message: "must start with http:// or https://" }, allow_nil: true
 
-    after_create :add_default_items
+    after_create :apply_standard_checklist
 
     scope :ordered, -> { order(:name) }
-
-    def cms_linked? = cms_url.present?
 
     def host
       URI.parse(url.to_s).host || url
@@ -34,32 +30,34 @@ module WebsiteChecklist
       url
     end
 
-    # Saves a person's changes. The token field left blank keeps the token.
-    def revise(attributes)
-      attributes = attributes.to_h.symbolize_keys
-      attributes.delete(:cms_token) if attributes[:cms_token].blank? && cms_token.present? && attributes[:cms_url].present?
-      update(attributes)
-    end
+    def revise(attributes) = update(attributes)
 
     # Counts over the items that apply (not the ones marked not applicable).
     def summary
       list = items.to_a
       applicable = list.reject(&:not_applicable?)
-      Summary.new(total: applicable.size, confirmed: applicable.count(&:confirmed?), changed: applicable.count(&:changed?),
-        unconfirmed: applicable.count { it.state == "unconfirmed" }, not_applicable: list.size - applicable.size,
-        problems: applicable.count { it.problem.present? || it.differs_from_cms? })
+      Summary.new(total: applicable.size, confirmed: applicable.count(&:confirmed?),
+        unconfirmed: applicable.count { !it.confirmed? }, not_applicable: list.size - applicable.size)
     end
 
-    def needs_attention? = sync_error.present? || !summary.ready?
+    def needs_attention? = !summary.ready?
 
-    # The standard checklist, once, when the site is added.
-    def add_default_items
-      existing = items.pluck(:key)
+    # The first step still to do, in order: where the checklist picks up.
+    def next_item = items.find { !it.settled? }
+
+    # The standard checklist (Site::Defaults), added where missing and put in its order with its
+    # current wording. Custom items follow, in the order they were added.
+    def apply_standard_checklist
+      existing = items.reload.index_by(&:key)
       now = Time.current
-      rows = Defaults::ITEMS.each_with_index.filter_map do |item, index|
-        item.merge(site_id: id, position: index * 10, created_at: now, updated_at: now) unless existing.include?(item[:key])
+      Defaults::ITEMS.each_with_index do |default, index|
+        attributes = default.slice(:group, :title, :detail).merge(position: index * 10)
+        if (item = existing[default[:key]])
+          item.update_columns(attributes.merge(updated_at: now)) if attributes.any? { |name, value| item[name] != value }
+        else
+          Item.insert!(attributes.merge(key: default[:key], site_id: id, created_at: now, updated_at: now))
+        end
       end
-      Item.insert_all!(rows) if rows.any?
       items.reset
     end
   end

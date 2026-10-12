@@ -43,22 +43,10 @@
     white-space: pre-line;
   }
 
-  .website-checklist-problem {
-    color: var(--color-negative);
-  }
-
-  .website-checklist-alert {
-    border: 1px solid var(--color-negative);
-    border-radius: calc(0.5rem * var(--radius-scale, 1));
-    color: var(--color-negative);
-    margin-block-end: var(--block-space);
-    padding: var(--block-space-half) var(--inline-space);
-  }
-
-  /* A site's page: the checklist on the left, the picked item on the right, kept in view. */
+  /* A site's page: the steps on the left, the picked one on the right, half each, kept in view. */
   .settings.settings--split.website-checklist-split {
     @media (min-width: 960px) {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
   }
 
@@ -105,5 +93,82 @@
     flex-direction: column;
     flex: 1;
     gap: var(--block-space-half);
+  }
+
+  .website-checklist-step {
+    font-variant-numeric: tabular-nums;
+    min-inline-size: 1.5em;
+    text-align: end;
+  }
+
+  .website-checklist-how {
+    background: var(--color-ink-lightest);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+    padding: var(--block-space-half) var(--inline-space);
+  }
+
+  .website-checklist-next {
+    margin-inline-start: auto;
+  }
+
+  /* The Webhooks step: each webhook an accordion, its keys and values rows of two fields. */
+  .website-checklist-webhooks,
+  .website-checklist-webhooks__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
+  .website-checklist-webhook {
+    border: 1px solid var(--color-ink-lighter);
+    border-radius: calc(0.5rem * var(--radius-scale, 1));
+  }
+
+  .website-checklist-webhook__summary {
+    align-items: center;
+    cursor: pointer;
+    display: grid;
+    gap: 0 var(--inline-space-half);
+    grid-template-columns: auto minmax(0, auto) minmax(0, 1fr);
+    list-style: none;
+    padding: var(--block-space-half) var(--inline-space);
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .website-checklist-webhook__caret {
+    color: var(--color-ink-medium);
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .website-checklist-webhook[open] > .website-checklist-webhook__summary .website-checklist-webhook__caret {
+    transform: none;
+  }
+
+  .website-checklist-webhook__body {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+    padding: var(--block-space-half) var(--inline-space);
+  }
+
+  .website-checklist-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-half);
+  }
+
+  .website-checklist-pair {
+    align-items: center;
+    display: grid;
+    gap: var(--inline-space-half);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
   }
 }

@@ -1,6 +1,8 @@
 <%# A save on the site's page: the item on the right, its row in the list, its group's count and the site's checklist count. %>
-<%= turbo_stream.update "website_checklist_detail", partial: "website_checklist/sites/item", locals: { item: @item, site: @site } %>
-<%= turbo_stream.replace dom_id(@item, :link), partial: "website_checklist/sites/item_link", locals: { item: @item, site: @site, current: true } %>
+<% steps = website_step_numbers(@site.items.to_a) %>
+<%= turbo_stream.update "website_checklist_detail", partial: "website_checklist/sites/item",
+      locals: { item: @item, site: @site, step: steps[@item], total: steps.size, next_item: steps.keys[steps[@item]] } %>
+<%= turbo_stream.replace dom_id(@item, :link), partial: "website_checklist/sites/item_link", locals: { item: @item, site: @site, step: steps[@item], current: true } %>
 <%= turbo_stream.replace dom_id(@site, "group_#{@item.group.parameterize(separator: "_")}"), partial: "website_checklist/sites/group_summary",
       locals: { site: @site, group: @item.group, items: @site.items.where(group: @item.group).to_a } %>
 <%= turbo_stream.replace dom_id(@site, :checklist_summary), partial: "website_checklist/sites/checklist_summary",

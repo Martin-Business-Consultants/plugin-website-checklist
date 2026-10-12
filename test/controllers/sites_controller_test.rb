@@ -2,8 +2,6 @@ require_relative "../test_helper"
 
 module WebsiteChecklist
   class SitesControllerTest < ActionDispatch::IntegrationTest
-    include CmsStandIn, ActiveJob::TestHelper
-
     setup do
       Setting.current.toggle_plugin!(:website_checklist, enabled: true)
       @site = Site.create!(client: clients(:acme), name: "Acme site", url: "https://acme.example")
@@ -43,15 +41,15 @@ module WebsiteChecklist
     test "a website's checklist, page and JSON" do
       get website_checklist_site_path(@site)
       assert_response :success
-      assert_includes response.body, "Sitemap submitted to Google Search Console"
-      assert_includes response.body, "Admin notification goes to (to and CCs)"
+      assert_includes response.body, "Google Search Console"
+      assert_includes response.body, "Who gets form notifications"
       assert_select "#website_checklist_detail", 1
       assert_select "aside.settings__panel--side", 0
       assert_select "nav.scope-nav a[aria-current='page']", 1
       assert_select "#website_checklist_detail input[name='item[value]']"
       assert_select "#website_checklist_detail textarea[name='item[note]']"
       assert_select "form[action$='/confirmation']", count: 0
-      assert_select "form[action$='/not_applicable']", count: 0
+      assert_select "form[action$='/not_applicable']", 1
 
       item = @site.items.find_by!(key: "forms:any:notification")
       get website_checklist_site_path(@site, item: item.id)
@@ -65,11 +63,8 @@ module WebsiteChecklist
       assert_equal "WebsiteChecklist::Site", body["type"]
     end
 
-    test "adding a website with a CMS reads it" do
-      assert_enqueued_jobs 1, only: Site::SyncJob do
-        post website_checklist_sites_path, params: { site: { client_id: clients(:globex).id, name: "Globex", url: "https://globex.example",
-          cms_url: "https://cms.globex.example", cms_token: "tok" } }
-      end
+    test "adding a website" do
+      post website_checklist_sites_path, params: { site: { client_id: clients(:globex).id, name: "Globex", url: "https://globex.example" } }
       site = Site.find_by!(name: "Globex")
       assert_redirected_to website_checklist_site_path(site)
       assert_equal clients(:globex), site.client
@@ -103,21 +98,6 @@ module WebsiteChecklist
       assert_response :success
       delete website_checklist_site_path(@site)
       assert Site.exists?(@site.id)
-    end
-
-    test "Read the CMS queues a sync, or says there's no CMS" do
-      post website_checklist_site_sync_path(@site)
-      assert_redirected_to website_checklist_site_path(@site)
-      assert_match "no CMS", flash[:alert]
-
-      @site.update!(cms_url: "https://cms.example", cms_token: "tok")
-      stand_in_cms(full_cms)
-      perform_enqueued_jobs { post website_checklist_site_sync_path(@site) }
-      assert_equal "Acme", @site.items.find_by!(key: "sender:from_name").value
-
-      get website_checklist_site_path(@site, item: @site.items.find_by!(key: "forms:contact:notification").id)
-      assert_includes response.body, "Open in the CMS"
-      assert_includes response.body, "ann@acme.example, bob@acme.example"
     end
 
     test "the client's Websites tab" do

@@ -31,10 +31,10 @@ module WebsiteChecklist
       assert_match %(<turbo-stream action="update" target="website_checklist_detail">), response.body
       assert_match %(<turbo-stream action="replace" target="link_website_checklist_item_#{@item.id}">), response.body
       assert_match "Confirmed", response.body
-      assert_match %(target="group_forms_website_checklist_site_#{@site.id}"), response.body
-      assert_match "1 of 4 confirmed", response.body
+      assert_match %(target="group_forms_and_email_website_checklist_site_#{@site.id}"), response.body
+      assert_match "1 of 7 done", response.body
       assert_match %(<turbo-stream action="replace" target="checklist_summary_website_checklist_site_#{@site.id}">), response.body
-      assert_match "13 to confirm", response.body
+      assert_match "25 to do", response.body
       assert_match "ann@acme.example", response.body
     end
 

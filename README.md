@@ -1,13 +1,13 @@
 # Website checklist for Runwell
 
-Every client's websites, each with a checklist of how it's set up — who form emails go to and
-come from, what the confirmation says, where submissions are posted, whether the sitemap went to
-the search engines, who signed off — recorded and confirmed by a person, so there is one
-accurate source of truth per site.
+Every client's websites, each with a step-by-step checklist to take it live: the place to gather
+and record everything a launch needs, in the order to get it. Access comes first (the domain
+registrar, DNS, the domain's email, the current site, Google Search Console, Google Analytics,
+the Business Profile, Bing), then forms and email, the launch itself, and what follows it.
 
 A Runwell plugin (Runwell's `docs/plugins.md`): a Rails engine that owns its `website_checklist_*`
 tables, reaches clients by id, and extends the core only through the plugin contract. Needs
-Runwell 2.21 or newer.
+Runwell 2.24 or newer.
 
 ## Install
 
@@ -20,45 +20,27 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
 
 ## What it does
 
-- **Websites**, in the nav: every client's sites, those needing attention first (something to
-  confirm, changed since it was confirmed, a problem, or a CMS that couldn't be read), and a
+- **Websites**, in the nav: every client's sites, those with steps still to do first, and a
   **Websites** tab on each client.
-- **The checklist**: every site starts with the standard one —
-  - Email sender: from name, from email, SPF/DKIM/DMARC for the sender's domain
-  - Forms: who the admin notification goes to (to and CCs), its wording, the confirmation
-    email's wording approved by the client, a test submission received
-  - Webhooks: where submissions go besides email
-  - Search: sitemap URL, sitemap submitted to Google Search Console and to Bing, analytics
-    receiving data
-  - Launch: domain and HTTPS, client sign-off
-  - Custom: anything else the team adds.
-- **A list and the item beside it**: a site's page lists its checklist on the left, each item
-  with a dot for its state; pick one and it opens on the right with what's known about it and its
-  value and note to change. Saving a value confirms it as yours (your name and the time are kept,
-  with the value as confirmed), and emptying it puts it back to confirm. If the value changes
-  later, what was confirmed shows as "was confirmed as". The site's client, address and CMS sit
-  in one line under its name. (Agents can still confirm, mark not applicable and reopen.)
-- **Read from the CMS** (optional): give a site its LibrePublish CMS address and an API token,
-  and "Read the CMS" (and a nightly run) fills in what the CMS can tell: the from name and email,
-  each published form's notification recipients, notification and confirmation wording (subject
-  and a content fingerprint), where each form posts, the CMS's webhooks, the sitemap and the
-  domain. Every value can still be edited: until someone does, it follows the CMS; after, it's
-  what the site should be, and a CMS that says otherwise is flagged (editing doesn't change the CMS). A confirmed value
-  the CMS no longer matches shows as **Changed**, and problems the CMS shows (a notification
-  switched off, a sender off the site's domain, a failing webhook, no HTTPS) are flagged. Each
-  item links to where it's set in the CMS.
-
-  It reads these endpoints, with the token's own permissions; whatever it can't read is listed
-  on the site and the checklist keeps working:
-
-  | Endpoint | Needs | For |
-  | --- | --- | --- |
-  | `GET /api/settings/general` | `settings:read` | the site base URL |
-  | `GET /api/settings/forms_settings` | `settings:read` | from name, from email |
-  | `GET /api/sitemap` | a token | sitemap URL and size |
-  | `GET /api/forms?status=published` | `forms:read` (Forms plugin) | the published forms |
-  | `GET /api/forms/:slug/emails` | `forms:read` | each form's notification and confirmation |
-  | `GET /api/webhooks` | `webhooks:read` | the CMS's webhooks |
+- **The go-live checklist**, numbered, in the order to work through it:
+  1. Access: domain registrar, DNS, the domain's email, the current website, Google Search
+     Console, Google Analytics, Google Business Profile, Bing Webmaster Tools
+  2. Forms and email: who gets form notifications, the name and address they come from, SPF,
+     DKIM and DMARC, the notification's wording, the confirmation approved by the client, and
+     webhooks
+  3. Launch: old addresses redirected, DNS switched, domain and HTTPS, email still arriving, a
+     test submission received, client sign-off
+  4. After launch: sitemap URL, sitemap submitted to Google and Bing, analytics receiving data,
+     the Business Profile's website link
+  5. Custom: anything else the team adds.
+- **A list and the step beside it**: the steps on the left, each with a dot for its state; pick
+  one and it opens on the right with what it's for, how to do it, and an example of what to
+  record. Saving a value confirms it as yours (your name and the time are kept), and emptying it
+  puts it back to do. A step the site doesn't need is marked so, and Next goes on to the
+  following step. The page opens on the first step still to do.
+- **Webhooks** are recorded one by one, each folding open: its name, its URL, and the keys and
+  values it's set up with (add and remove rows as you go).
+- Never a password or secret: record where it's kept.
 
 ## Permissions
 
@@ -67,11 +49,11 @@ deleting websites takes "Add, change and delete websites" (owners and managers).
 
 ## Agents
 
-Every page has its tool: `list_websites`, `show_website`, `create_website`, `update_website`,
-`delete_website`, `sync_website`, `add_website_item`, `update_website_item`,
-`delete_website_item`, `confirm_website_item`, `reopen_website_item` and
-`mark_website_item_not_applicable`. "Checking a client's website" is offered to agents as a
-workflow.
+Every page has its tool: `list_websites`, `show_website` (each step with how to do it, and the
+next step), `create_website`, `update_website`, `delete_website`, `add_website_item`,
+`update_website_item` (`webhooks_attributes` for the Webhooks step), `delete_website_item`,
+`confirm_website_item`, `reopen_website_item` and `mark_website_item_not_applicable`. "Taking a
+client's website live" is offered to agents as a workflow.
 
 ## Developing
 

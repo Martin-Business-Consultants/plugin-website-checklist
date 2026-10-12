@@ -20,18 +20,6 @@
     </label>
   </div>
 
-  <label class="record-form__field">
-    <span class="record-form__label">CMS</span>
-    <%= form.url_field :cms_url, class: "input full-width", autocomplete: "off", placeholder: "https://example.librepublish.com" %>
-    <span class="record-form__hint">Optional. The LibrePublish CMS that runs the site: its sender, forms, webhooks and sitemap are read into the checklist. Blank keeps the checklist by hand.</span>
-  </label>
-
-  <label class="record-form__field">
-    <span class="record-form__label">CMS token</span>
-    <%= secret_field form, :cms_token, placeholder: "From the CMS's Settings › API tokens" %>
-    <span class="record-form__hint">A token that can read settings, forms and webhooks (settings:read, forms:read, webhooks:read). Whatever it can't read is said on the checklist.</span>
-  </label>
-
   <div class="record-form__footer">
     <%= link_to "Cancel", site.new_record? ? website_checklist_sites_path : website_checklist_site_path(site), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
     <button type="submit" class="btn btn--link" data-form-target="submit">

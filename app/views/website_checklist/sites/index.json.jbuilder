@@ -8,6 +8,5 @@ json.websites @sites do |site|
   json.client agent_ref(site.client)
   json.checklist summary.to_h
   json.needs_attention website_attention_text(site, summary)
-  json.read_from_cms site.cms_linked?
-  json.extract! site, :synced_at, :sync_error
+  json.next_step site.next_item&.title
 end

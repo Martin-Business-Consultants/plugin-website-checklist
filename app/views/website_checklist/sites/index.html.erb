@@ -10,7 +10,7 @@
 <section class="panel shadow center index-table">
   <table class="data-table">
     <thead>
-      <tr><th>Website</th><th><%= term(:client) %></th><th>Checklist</th><th>Needs a look</th><th>Read from</th><th></th></tr>
+      <tr><th>Website</th><th><%= term(:client) %></th><th>Checklist</th><th>To do</th><th></th></tr>
     </thead>
     <tbody>
       <% @sites.each do |site| %>
@@ -26,7 +26,6 @@
           <td><%= link_to site.client.name, client_path(site.client, tab: "plugin-website_checklist"), class: "txt-ink" %></td>
           <td><%= website_summary_tag site, summary %></td>
           <td class="txt-small"><%= website_attention_text(site, summary) || "Nothing" %></td>
-          <td class="txt-small txt-subtle txt-nowrap"><%= site.cms_linked? ? "CMS" : "By hand" %></td>
           <%= render "layouts/shared/row_actions", name: site.name,
                 edit_path: (edit_website_checklist_site_path(site) if can?(:manage_websites)),
                 delete_path: (website_checklist_site_path(site) if can?(:manage_websites)),
@@ -35,11 +34,11 @@
       <% end %>
       <% if @sites.empty? %>
         <tr>
-          <td colspan="6" class="txt-subtle txt-small">
+          <td colspan="5" class="txt-subtle txt-small">
             <% if @show == "attention" && @counts["all"].positive? %>
-              Every website's checklist is confirmed. <%= link_to "Show all", website_checklist_sites_path(show: "all", client_id: @client&.id), class: "txt-link" %>
+              Every website is live, every step confirmed. <%= link_to "Show all", website_checklist_sites_path(show: "all", client_id: @client&.id), class: "txt-link" %>
             <% else %>
-              No websites yet. Add each <%= term(:client).downcase %>'s website to keep how it's set up in one place.
+              No websites yet. Add a <%= term(:client).downcase %>'s website to gather what it needs to go live, step by step.
             <% end %>
           </td>
         </tr>

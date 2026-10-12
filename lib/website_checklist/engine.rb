@@ -9,7 +9,6 @@ module WebsiteChecklist
       app.routes.append do
         scope module: "website_checklist", as: "website_checklist" do
           resources :sites, path: "websites" do
-            resource :sync, only: :create
             resources :items, only: %i[create edit update destroy] do
               resource :confirmation, only: %i[create destroy], controller: "items/confirmations"
               resource :not_applicable, only: :create, controller: "items/not_applicables"
@@ -32,21 +31,20 @@ module WebsiteChecklist
 
     config.to_prepare do
       Runwell::Plugins.register :website_checklist, name: "Websites", version: WebsiteChecklist::VERSION,
-        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.21.0",
+        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.24.0",
         homepage: "https://github.com/Martin-Business-Consultants/plugin-website-checklist",
-        description: "Every client's websites, each with a checklist of how it's set up (who form emails go to and " \
-                     "come from, what the confirmation says, webhooks, the sitemap sent to search engines, sign-off), " \
-                     "confirmed by a person. A site run by the CMS fills in what it can tell, and flags what changed."
+        description: "Every client's websites, each with a step-by-step checklist to take it live: access to the " \
+                     "domain, DNS, Search Console and Analytics first, then forms and email, launch and after launch, " \
+                     "each recorded and confirmed by a person."
       Runwell::Plugins.nav :website_checklist, "Websites", -> { website_checklist_sites_path }
       Runwell::Plugins.permission :website_checklist, :manage_websites, name: "Add, change and delete websites", roles: %w[owner manager]
       Runwell::Plugins.stylesheet :website_checklist, "website_checklist/website_checklist"
       Runwell::Plugins.slot :client_panel, :website_checklist, "website_checklist/slots/client_panel"
-      Runwell::Plugins.nightly :website_checklist, -> { WebsiteChecklist::Site.sync_all_later }
-      Runwell::Plugins.agent_workflow :website_checklist, "Checking a client's website", <<~STEPS
-        1. `list_websites` (show: attention) for the sites with something to confirm, a change or a problem; `show_website` for one's checklist.
-        2. `sync_website` on a site run by the CMS to read what it says now; a value written by hand is what it should be, and a CMS that says otherwise is flagged.
-        3. `update_website_item` to record what's true (who the notification goes to, when the sitemap went to Google): saving a value confirms it as yours, and `confirm_website_item` confirms one as it stands; `mark_website_item_not_applicable` for what the site doesn't need.
-        4. A changed item means the CMS no longer matches what was confirmed: find out which is right, then confirm it again or fix the CMS.
+      Runwell::Plugins.agent_workflow :website_checklist, "Taking a client's website live", <<~STEPS
+        1. `list_websites` (show: attention) for the sites with steps still to do; `show_website` for one's checklist, in order, with how to do each step and its next_step.
+        2. Work down the steps in order: access first (registrar, DNS, the domain's email, the current site, Search Console, Analytics, Business Profile, Bing), since later steps need it.
+        3. `update_website_item` to record what's true (whose account, what we can do, the IDs): saving a value confirms it as yours. The Webhooks step takes webhooks_attributes (name, url, pairs). `mark_website_item_not_applicable` for what the site doesn't need.
+        4. What only the client can do (adding us to an account, approving wording) goes to them as a question; never record a password or secret, only where it's kept.
       STEPS
     end
   end
