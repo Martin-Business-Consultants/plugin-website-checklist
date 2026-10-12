@@ -8,6 +8,7 @@ module WebsiteChecklist
     initializer "website_checklist.routes" do |app|
       app.routes.append do
         scope module: "website_checklist", as: "website_checklist" do
+          resources :audits, only: :index, path: "websites/history"
           resources :sites, path: "websites" do
             resources :items, only: %i[create edit update destroy] do
               resource :confirmation, only: %i[create destroy], controller: "items/confirmations"

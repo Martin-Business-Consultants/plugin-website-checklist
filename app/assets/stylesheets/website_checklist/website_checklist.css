@@ -171,4 +171,45 @@
     gap: var(--inline-space-half);
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto;
   }
+
+  /* The history: each change's fields, before struck through and after beside it. */
+  .website-checklist-history td {
+    vertical-align: top;
+  }
+
+  .website-checklist-history__who {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--inline-space-half);
+  }
+
+  .website-checklist-diff {
+    display: grid;
+    gap: 0.25em var(--inline-space);
+    grid-template-columns: auto minmax(0, 1fr);
+    margin: 0.35em 0 0;
+
+    dt {
+      color: var(--color-ink-dark);
+    }
+
+    dd {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25em var(--inline-space-half);
+      margin: 0;
+      overflow-wrap: anywhere;
+      white-space: pre-line;
+    }
+
+    del {
+      background: oklch(var(--lch-red-medium) / 12%);
+      color: var(--color-ink-dark);
+    }
+
+    ins {
+      background: oklch(var(--lch-green-medium) / 15%);
+      text-decoration: none;
+    }
+  }
 }

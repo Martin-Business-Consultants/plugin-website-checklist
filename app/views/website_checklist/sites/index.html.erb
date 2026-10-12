@@ -3,6 +3,9 @@
 <% content_for :index_filters do %>
   <%= render "layouts/shared/quick_filter", title: "Show…", param: :show, current: @show,
         options: [ [ "Needs attention (#{@counts["attention"]})", "attention" ], [ "All (#{@counts["all"]})", "all" ] ] %>
+  <%= link_to website_checklist_audits_path, class: "btn txt-small" do %>
+    <%= icon_tag "history" %> <span>History</span>
+  <% end %>
 <% end %>
 <%= render "layouts/shared/index_toolbar", new_text: (can?(:manage_websites) ? "Add a website" : nil),
       new_path: (new_website_checklist_site_path(client_id: @client&.id) if can?(:manage_websites)) %>

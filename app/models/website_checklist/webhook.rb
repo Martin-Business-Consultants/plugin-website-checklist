@@ -2,7 +2,9 @@ module WebsiteChecklist
   # A webhook the site's forms post to, recorded on the Webhooks step: its name, the address, and
   # the keys and values it's set up with (headers, field names, an account or list ID).
   class Webhook < ApplicationRecord
-    belongs_to :item, touch: true
+    include Audited
+
+    belongs_to :item, touch: true, inverse_of: :webhooks
 
     serialize :pairs, coder: JSON, type: Array
 
@@ -25,5 +27,10 @@ module WebsiteChecklist
       line = [ name, url ].compact.join(" → ")
       pairs.any? ? "#{line} (#{pairs.map { "#{it["key"]}: #{it["value"]}" }.join(", ")})" : line
     end
+
+    private
+      def audit_site = item.site
+      def audit_item_id = item_id
+      def audit_label = name || url || "Webhook"
   end
 end

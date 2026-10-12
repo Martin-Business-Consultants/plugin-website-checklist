@@ -2,6 +2,8 @@ module WebsiteChecklist
   # A client's website and the checklist to take it live: what to gather and record, step by
   # step, each recorded and confirmed by a person.
   class Site < ApplicationRecord
+    include Audited
+
     # Left from reading a CMS (before 0.3); dropped in a later release.
     self.ignored_columns += %w[cms_url cms_token synced_at sync_error]
 
@@ -10,6 +12,9 @@ module WebsiteChecklist
       def to_h = super.merge(ready: ready?)
       def to_s = ready? ? "All #{total} confirmed" : "#{confirmed} of #{total} confirmed"
     end
+
+    # Before the items go: their webhooks point at them.
+    before_destroy { Webhook.where(item_id: items.select(:id)).delete_all }
 
     belongs_to :client
     has_many :items, -> { ordered }, dependent: :delete_all
@@ -42,6 +47,8 @@ module WebsiteChecklist
 
     def needs_attention? = !summary.ready?
 
+    def to_s = name
+
     # The first step still to do, in order: where the checklist picks up.
     def next_item = items.find { !it.settled? }
 
@@ -60,5 +67,9 @@ module WebsiteChecklist
       end
       items.reset
     end
+
+    private
+      def audit_site = self
+      def audit_value(field, value) = field == "client_id" ? Client.find_by(id: value)&.name : super
   end
 end

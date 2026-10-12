@@ -41,6 +41,11 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
 - **Webhooks** are recorded one by one, each folding open: its name, its URL, and the keys and
   values it's set up with (add and remove rows as you go).
 - Never a password or secret: record where it's kept.
+- **History**: every change to a website, its steps and its webhooks is kept, with who made it
+  (a person, or their agent and the app it came through), when, and each field's before and
+  after. For all websites (History on the Websites page), one website (History on its page) or one
+  step and its webhooks (History beside the step), and as a CSV download. Deleting a website
+  keeps its history.
 
 ## Permissions
 
@@ -52,7 +57,8 @@ deleting websites takes "Add, change and delete websites" (owners and managers).
 Every page has its tool: `list_websites`, `show_website` (each step with how to do it, and the
 next step), `create_website`, `update_website`, `delete_website`, `add_website_item`,
 `update_website_item` (`webhooks_attributes` for the Webhooks step), `delete_website_item`,
-`confirm_website_item`, `reopen_website_item` and `mark_website_item_not_applicable`. "Taking a
+`confirm_website_item`, `reopen_website_item`, `mark_website_item_not_applicable` and
+`website_history`. "Taking a
 client's website live" is offered to agents as a workflow.
 
 ## Developing

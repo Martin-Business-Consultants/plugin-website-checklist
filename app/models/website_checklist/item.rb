@@ -4,6 +4,8 @@ module WebsiteChecklist
   # a value changed later is to confirm again. The standard steps' guidance (`how`, `example`) is
   # read from Site::Defaults.
   class Item < ApplicationRecord
+    include Audited
+
     GROUPS = [ *Site::Defaults::GROUPS, "Custom" ].freeze
     STATES = %w[unconfirmed confirmed not_applicable].freeze
     STATE_LABELS = { "unconfirmed" => "To do", "confirmed" => "Confirmed", "not_applicable" => "Not applicable" }.freeze
@@ -12,7 +14,7 @@ module WebsiteChecklist
     self.ignored_columns += %w[kind detected_value detected_at problem href]
 
     belongs_to :site, touch: true
-    has_many :webhooks, -> { ordered }, dependent: :delete_all
+    has_many :webhooks, -> { ordered }, dependent: :delete_all, inverse_of: :item
     accepts_nested_attributes_for :webhooks, allow_destroy: true, reject_if: :blank_webhook?
 
     validates :key, presence: true, uniqueness: { scope: :site_id }
@@ -58,25 +60,50 @@ module WebsiteChecklist
 
     # A person's change: a new value has to be confirmed again (what was confirmed stays, as "was").
     def revise(attributes)
-      attributes = attributes.to_h.symbolize_keys
-      if webhooks? && attributes.key?(:webhooks_attributes)
-        self.webhooks_attributes = attributes[:webhooks_attributes]
-        kept = webhooks.reject(&:marked_for_destruction?)
-        kept.each_with_index { |webhook, index| webhook.position = index }
-        self.value = kept.map(&:to_s).join("\n")
-      end
-      assign_attributes(attributes.slice(:value, :note, *(custom? ? %i[title detail] : [])))
-      self.state = "unconfirmed" if value_changed? && !not_applicable?
+      assign_revision(attributes)
       save
     end
 
     # A person saying what's true: the value (and any note) saved and confirmed as theirs, or
-    # an empty value back to confirm.
+    # an empty value back to confirm. One save, so the history has it as one change.
     def record(attributes, by:)
-      revise(attributes) && (value.present? ? confirm(by: by) : reopen)
+      assign_revision(attributes)
+      if value.present?
+        assign_attributes(confirmed_value: value, state: "confirmed", confirmed_by_name: by.display_name, confirmed_at: Time.current)
+      else
+        assign_attributes(state: "unconfirmed", confirmed_value: nil, confirmed_by_name: nil, confirmed_at: nil)
+      end
+      save
     end
 
+    def to_s = title
+
     private
+      def assign_revision(attributes)
+        attributes = attributes.to_h.symbolize_keys
+        if webhooks? && attributes.key?(:webhooks_attributes)
+          self.webhooks_attributes = attributes[:webhooks_attributes]
+          kept = webhooks.reject(&:marked_for_destruction?)
+          kept.each_with_index { |webhook, index| webhook.position = index }
+          self.value = kept.map(&:to_s).join("\n")
+        end
+        assign_attributes(attributes.slice(:value, :note, *(custom? ? %i[title detail] : [])))
+        self.state = "unconfirmed" if value_changed? && !not_applicable?
+      end
+
+      def audit_site = site
+      def audit_item_id = id
+      def audit_value(field, value) = field == "state" ? STATE_LABELS[value] : super
+
+      # A state change says what happened: confirmed, marked not applicable, reopened; a value
+      # saved and confirmed at once was recorded.
+      def audit_action(action, diff)
+        return action unless action == "updated" && diff.key?("state")
+        return diff["state"].last == "Confirmed" ? "recorded" : action if diff.key?("value")
+
+        { "Confirmed" => "confirmed", "Not applicable" => "marked not applicable", "To do" => "reopened" }.fetch(diff["state"].last, action)
+      end
+
       def blank_webhook?(attributes)
         attributes["id"].blank? && attributes["name"].blank? && attributes["url"].blank?
       end

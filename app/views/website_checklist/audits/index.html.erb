@@ -1,0 +1,83 @@
+<% @page_title = @item ? "History of #{@item.title}" : @site ? "History of #{@site.name}" : "Websites' history" %>
+
+<% content_for :header do %>
+  <% if @site %>
+    <%= parent_page @site.name, website_checklist_site_path(@site, item: @item&.id) %>
+  <% else %>
+    <%= parent_page "Websites", website_checklist_sites_path %>
+  <% end %>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <div class="page-heading">
+      <h1 class="page-title"><%= @page_title %></h1>
+      <div class="page-heading__actions">
+        <%= link_to website_checklist_audits_path(site_id: @site&.id, item_id: @item&.id, format: :csv), class: "btn btn--circle-mobile", data: { turbo: false } do %>
+          <%= icon_tag "share" %>
+          <span>Download CSV</span>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @audits.empty? %>
+      <p class="txt-small txt-subtle margin-none">No changes yet. Every change to <%= @item ? "this step" : @site ? "this website and its checklist" : "a website or its checklist" %> shows here: who made it, when, and what it was before and after.</p>
+    <% else %>
+      <table class="data-table website-checklist-history">
+        <thead>
+          <tr><th>When</th><th>Who</th><th>What</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+          <% @audits.each do |audit| %>
+            <%# herb:key audit.id %>
+            <tr data-filter-target="item">
+              <td class="txt-small txt-nowrap" title="<%= l audit.created_at, format: :long %>"><%= l audit.created_at, format: :short %></td>
+              <td class="txt-small">
+                <span class="website-checklist-history__who">
+                  <%= person_tag audit.actor %>
+                  <span><%= audit.actor_label %></span>
+                </span>
+              </td>
+              <td class="txt-small">
+                <% if audit.record_type != "Site" && audit.item_id && audit.site_id && audit.action != "deleted" %>
+                  <%= link_to audit.subject_label, website_checklist_site_path(audit.site_id, item: audit.item_id), class: "txt-link" %>
+                <% else %>
+                  <%= audit.subject_label %>
+                <% end %>
+                <% unless @site %>
+                  <div class="txt-x-small txt-subtle"><%= audit.site_name %></div>
+                <% end %>
+              </td>
+              <td class="txt-small">
+                <strong><%= audit.action.upcase_first %></strong>
+                <% if audit.diff.any? %>
+                  <dl class="website-checklist-diff">
+                    <% audit.diff.each do |field, (before, after)| %>
+                      <%# herb:key field %>
+                      <dt><%= WebsiteChecklist::Audit.field_label(field) %></dt>
+                      <dd>
+                        <% if before %>
+                          <del><%= before %></del>
+                        <% end %>
+                        <% if after %>
+                          <ins><%= after %></ins>
+                        <% else %>
+                          <span class="txt-subtle">(blank)</span>
+                        <% end %>
+                      </dd>
+                    <% end %>
+                  </dl>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @older %>
+        <div class="section-actions">
+          <%= link_to "Older changes", website_checklist_audits_path(site_id: @site&.id, item_id: @item&.id, before: @older), class: "btn txt-small" %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</section>

@@ -76,6 +76,7 @@
     <% else %>
       <%= button_to "Doesn't apply to this site", website_checklist_site_item_not_applicable_path(site, item), class: "btn btn--plain txt-small", form: { data: { turbo_frame: "_top" } } %>
     <% end %>
+    <%= link_to "History", website_checklist_audits_path(site_id: site.id, item_id: item.id), class: "btn txt-small", data: { turbo_frame: "_top" } %>
     <% if item.custom? %>
       <%= render "layouts/shared/delete_dialog", name: "“#{item.title}”", path: website_checklist_site_item_path(site, item), trigger_class: "txt-small" %>
     <% end %>

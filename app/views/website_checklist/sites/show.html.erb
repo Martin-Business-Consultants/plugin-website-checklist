@@ -13,6 +13,10 @@
       <div class="page-heading">
         <h1 class="page-title"><%= @page_title %></h1>
         <div class="page-heading__actions">
+          <%= link_to website_checklist_audits_path(site_id: @site.id), class: "btn btn--circle-mobile", data: { turbo_frame: "_top" } do %>
+            <%= icon_tag "history" %>
+            <span>History</span>
+          <% end %>
           <% if can?(:manage_websites) %>
             <%= link_to edit_website_checklist_site_path(@site), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
               <%= icon_tag "pencil" %>

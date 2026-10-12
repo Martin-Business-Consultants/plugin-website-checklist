@@ -45,5 +45,11 @@ Read first, in Runwell's repository:
 - The Webhooks step (`Item#webhooks?`) records `Webhook`s (name, url, `pairs` of keys and values)
   through nested attributes; its value is them written out. The form is a repeater over the
   core's `repeater` Stimulus controller, built in `SitesHelper` (partials can't render in a form).
+- Every change is audited (`Audited`, included in `Site`, `Item` and `Webhook`): an `Audit` per
+  create, update and delete with the changed fields' before and after as people read them, who
+  (`Current.user`, `Current.source`, the token's name) and the site, written in the save's
+  transaction. Bulk writes that skip callbacks (`insert!`, `delete_all`) aren't audited: keep
+  them to system work (`apply_standard_checklist`, a site's deletion, which is audited itself). A
+  verb should save once so a change is one entry (`Item#record`). `AuditsController` shows them.
 - There is no CMS integration (removed in 0.3). The old CMS columns are ignored
   (`ignored_columns`) and dropped in a later release.
