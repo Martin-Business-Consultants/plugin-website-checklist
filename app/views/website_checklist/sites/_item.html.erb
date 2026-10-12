@@ -87,9 +87,16 @@
     <% else %>
       <p class="txt-x-small txt-subtle margin-none">None yet: keep what backs this step up here (an export, a screenshot, a sitemap).</p>
     <% end %>
-    <%= form_with url: website_checklist_site_item_files_path(site, item), class: "website-checklist-file-form", data: { controller: "form", turbo_frame: "_top" } do %>
-      <%= file_field_tag "files[]", multiple: true, class: "input txt-small", aria: { label: "Files to add" } %>
-      <button type="submit" class="btn txt-small"><%= icon_tag "add" %> <span>Add files</span></button>
+    <%# The core's drop box (the upload controller): dropped or chosen files go straight to storage,
+        their progress on the box, then the form posts their signed ids. %>
+    <%= form_with url: website_checklist_site_item_files_path(site, item), multipart: true,
+          data: { controller: "upload", upload_url_value: rails_direct_uploads_url, upload_max_size_value: Document::MAX_SIZE, turbo_frame: "_top" } do %>
+      <label class="btn input--upload full-width txt-small website-checklist-drop">
+        <%= icon_tag "attachment" %>
+        <span data-upload-target="status">Drop files here or <span class="txt-link">choose…</span> <span class="txt-subtle">· up to <%= number_to_human_size(Document::MAX_SIZE) %> each</span></span>
+        <progress max="100" value="0" hidden data-upload-target="progress"></progress>
+        <input type="file" name="files[]" multiple aria-label="Add files to <%= item.title %>" data-upload-target="input" data-action="change->upload#start">
+      </label>
     <% end %>
   </section>
 

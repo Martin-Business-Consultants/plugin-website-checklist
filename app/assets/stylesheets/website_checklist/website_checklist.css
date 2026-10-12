@@ -343,15 +343,7 @@
     }
   }
 
-  .website-checklist-file-form {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half);
-
-    .input {
-      flex: 1;
-      min-inline-size: 0;
-    }
+  .website-checklist-drop {
+    min-block-size: 4.5rem;
   }
 }
