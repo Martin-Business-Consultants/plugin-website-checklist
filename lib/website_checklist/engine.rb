@@ -10,7 +10,13 @@ module WebsiteChecklist
         scope module: "website_checklist", as: "website_checklist" do
           resources :audits, only: :index, path: "websites/history"
           resources :sites, path: "websites" do
+            resources :scans, only: %i[index create]
+            resources :recommendations, only: [] do
+              resource :approval, only: :create, controller: "recommendations/approvals"
+              resource :rejection, only: :create, controller: "recommendations/rejections"
+            end
             resources :items, only: %i[create edit update destroy] do
+              resources :files, only: %i[create destroy], controller: "items/files"
               resource :confirmation, only: %i[create destroy], controller: "items/confirmations"
               resource :not_applicable, only: :create, controller: "items/not_applicables"
             end

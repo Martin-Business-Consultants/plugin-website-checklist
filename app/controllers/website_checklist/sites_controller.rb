@@ -31,7 +31,7 @@ module WebsiteChecklist
     end
 
     def show
-      @items = @site.items.to_a
+      @items = @site.items.with_attached_files.to_a
       @item = @items.find { it.id.to_s == params[:item].to_s } || @site.next_item || @items.first
     end
 

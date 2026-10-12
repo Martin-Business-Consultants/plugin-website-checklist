@@ -13,6 +13,23 @@
       <div class="page-heading">
         <h1 class="page-title"><%= @page_title %></h1>
         <div class="page-heading__actions">
+          <% if WebsiteChecklist::Scan.ai_available_for?(@site) %>
+            <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+              <button type="button" class="btn btn--circle-mobile" data-action="dialog#open">
+                <%= icon_tag "ai" %>
+                <span>AI audit</span>
+              </button>
+              <dialog class="dialog panel website-checklist-sheet" data-dialog-target="dialog" aria-label="AI audit">
+                <div class="website-checklist-sheet__bar">
+                  <h2 class="dialog__title">AI audit · <%= @site.name %></h2>
+                  <%= link_to "Done", website_checklist_site_path(@site, item: @item&.id), class: "btn txt-small", data: { turbo_frame: "_top" } %>
+                </div>
+                <turbo-frame id="website_checklist_scan" src="<%= website_checklist_site_scans_path(@site) %>" loading="lazy">
+                  <p class="txt-small txt-subtle margin-none">Loading…</p>
+                </turbo-frame>
+              </dialog>
+            </div>
+          <% end %>
           <%= link_to website_checklist_audits_path(site_id: @site.id), class: "btn btn--circle-mobile", data: { turbo_frame: "_top" } do %>
             <%= icon_tag "history" %>
             <span>History</span>

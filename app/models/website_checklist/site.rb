@@ -13,11 +13,16 @@ module WebsiteChecklist
       def to_s = ready? ? "All #{total} confirmed" : "#{confirmed} of #{total} confirmed"
     end
 
-    # Before the items go: their webhooks point at them.
-    before_destroy { Webhook.where(item_id: items.select(:id)).delete_all }
+    # Before the items go, without a callback each: what points at them, and their files.
+    before_destroy do
+      Webhook.where(item_id: items.select(:id)).delete_all
+      Recommendation.where(item_id: items.select(:id)).delete_all
+      ActiveStorage::Attachment.where(record_type: Item.name, record_id: items.select(:id)).find_each(&:purge_later)
+    end
 
     belongs_to :client
     has_many :items, -> { ordered }, dependent: :delete_all
+    has_many :scans, dependent: :destroy
 
     normalizes :url, with: ->(url) { url.strip.chomp("/").presence }
     normalizes :name, with: ->(name) { name.strip }

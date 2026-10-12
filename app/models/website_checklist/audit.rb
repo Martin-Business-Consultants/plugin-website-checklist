@@ -5,7 +5,7 @@ module WebsiteChecklist
   class Audit < ApplicationRecord
     FIELD_LABELS = { "name" => "Name", "url" => "Address", "client_id" => "Client", "title" => "Title", "detail" => "Detail",
       "group" => "Group", "value" => "Value", "confirmed_value" => "Confirmed as", "state" => "State", "note" => "Note",
-      "custom" => "Custom", "pairs" => "Keys and values" }.freeze
+      "custom" => "Custom", "pairs" => "Keys and values", "files" => "Files" }.freeze
 
     serialize :diff, coder: JSON, type: Hash
 

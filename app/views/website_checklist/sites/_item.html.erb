@@ -70,6 +70,29 @@
     </div>
   <% end %>
 
+  <section class="flex flex-column gap-half" aria-label="Files">
+    <span class="record-form__label txt-small">Files</span>
+    <% if item.files.attachments.any? %>
+      <ul class="website-checklist-files txt-small">
+        <% item.files.attachments.each do |file| %>
+          <%# herb:key file.id %>
+          <li>
+            <%= icon_tag "attachment" %>
+            <%= link_to file.filename.to_s, rails_blob_path(file, disposition: "attachment"), class: "txt-link overflow-ellipsis", data: { turbo: false } %>
+            <span class="txt-x-small txt-subtle"><%= number_to_human_size(file.byte_size) %></span>
+            <%= render "layouts/shared/delete_dialog", name: file.filename.to_s, path: website_checklist_site_item_file_path(site, item, file), trigger_class: "txt-small" %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="txt-x-small txt-subtle margin-none">None yet: keep what backs this step up here (an export, a screenshot, a sitemap).</p>
+    <% end %>
+    <%= form_with url: website_checklist_site_item_files_path(site, item), class: "website-checklist-file-form", data: { controller: "form", turbo_frame: "_top" } do %>
+      <%= file_field_tag "files[]", multiple: true, class: "input txt-small", aria: { label: "Files to add" } %>
+      <button type="submit" class="btn txt-small"><%= icon_tag "add" %> <span>Add files</span></button>
+    <% end %>
+  </section>
+
   <div class="website-checklist-item__actions txt-small">
     <% if item.not_applicable? %>
       <%= button_to "It applies after all", website_checklist_site_item_confirmation_path(site, item), method: :delete, class: "btn btn--plain txt-small", form: { data: { turbo_frame: "_top" } } %>

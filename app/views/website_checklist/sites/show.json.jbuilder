@@ -12,6 +12,12 @@ json.items website_item_groups(@items).flat_map(&:last).each_with_index.to_a do 
   json.step index + 1
   json.extract! item, :id, :key, :group, :title, :detail, :how, :example, :value, :confirmed_value, :state, :note,
     :confirmed_by_name, :confirmed_at, :custom
+  json.files item.files.attachments do |file|
+    json.id file.id
+    json.filename file.filename.to_s
+    json.byte_size file.byte_size
+    json.url rails_blob_url(file, disposition: "attachment")
+  end
   if item.webhooks?
     json.webhooks item.webhooks do |webhook|
       json.extract! webhook, :id, :name, :url, :pairs

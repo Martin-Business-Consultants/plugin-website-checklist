@@ -51,5 +51,14 @@ Read first, in Runwell's repository:
   transaction. Bulk writes that skip callbacks (`insert!`, `delete_all`) aren't audited: keep
   them to system work (`apply_standard_checklist`, a site's deletion, which is audited itself). A
   verb should save once so a change is one entry (`Item#record`). `AuditsController` shows them.
+- Steps keep files (`Item#files`, Active Storage; `add_file` / `remove_file` audit them).
+- The AI audit: `Scan` (a site's domain) runs in `ScanJob`: `Site::Probe` gathers facts from
+  outside (DNS through Resolv, RDAP through rdap.org, the pages over Net::HTTP with timeouts, size
+  caps and a refusal of private addresses; every part fails on its own) and keeps files (the
+  sitemap); then the AI plugin's `Ai.structured` (1.2.0; checked with `Scan.ai_available_for?`,
+  so this plugin works without it) answers a strict schema of recommendations, one per step key.
+  `Recommendation#approve!` records through `Item#record` as the approver and attaches the file;
+  `reject!` leaves the step alone. The sheet is `scans/index` in a lazy frame inside a modal on
+  the site's page; its Done link reloads the page.
 - There is no CMS integration (removed in 0.3). The old CMS columns are ignored
   (`ignored_columns`) and dropped in a later release.

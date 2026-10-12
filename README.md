@@ -40,6 +40,16 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
   following step. The page opens on the first step still to do.
 - **Webhooks** are recorded one by one, each folding open: its name, its URL, and the keys and
   values it's set up with (add and remove rows as you go).
+- **Files** on every step, beside its note: an export, a screenshot, the sitemap.
+- **AI audit** (with the AI plugin on, 1.2 or newer): a sheet two-thirds of the window wide that
+  takes the site's domain and finds out what it can from outside, without logging in anywhere:
+  the registrar and when the domain renews (the registry's RDAP record), who hosts its DNS and
+  email, SPF and DMARC, Google and Bing verifications, how its addresses answer, the Analytics and
+  Tag Manager IDs on its home page, where its forms post, and its robots.txt and sitemap (kept as a
+  file). The install's AI turns that into a recommendation per step, listed on the sheet's left;
+  the one picked shows on its right, to approve as it is, change and approve, or reject. Approving
+  records it on the step as yours (in the history) and attaches any file it brought. Only public
+  addresses are fetched.
 - Never a password or secret: record where it's kept.
 - **History**: every change to a website, its steps and its webhooks is kept, with who made it
   (a person, or their agent and the app it came through), when, and each field's before and
@@ -57,7 +67,9 @@ deleting websites takes "Add, change and delete websites" (owners and managers).
 Every page has its tool: `list_websites`, `show_website` (each step with how to do it, and the
 next step), `create_website`, `update_website`, `delete_website`, `add_website_item`,
 `update_website_item` (`webhooks_attributes` for the Webhooks step), `delete_website_item`,
-`confirm_website_item`, `reopen_website_item`, `mark_website_item_not_applicable` and
+`confirm_website_item`, `reopen_website_item`, `mark_website_item_not_applicable`,
+`add_website_item_file`, `remove_website_item_file`, `audit_website_with_ai`,
+`show_website_ai_audit`, `approve_website_recommendation`, `reject_website_recommendation` and
 `website_history`. "Taking a
 client's website live" is offered to agents as a workflow.
 

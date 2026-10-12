@@ -16,6 +16,8 @@ module WebsiteChecklist
     belongs_to :site, touch: true
     has_many :webhooks, -> { ordered }, dependent: :delete_all, inverse_of: :item
     accepts_nested_attributes_for :webhooks, allow_destroy: true, reject_if: :blank_webhook?
+    has_many :recommendations, dependent: :delete_all
+    has_many_attached :files
 
     validates :key, presence: true, uniqueness: { scope: :site_id }
     validates :title, :group, presence: true
@@ -77,6 +79,19 @@ module WebsiteChecklist
     end
 
     def to_s = title
+
+    # A file kept on the step (a sitemap, a DNS export, a screenshot), in the history too.
+    def add_file(attachable)
+      files.attach(attachable)
+      touch
+      audit "file added", { "files" => [ nil, files.attachments.last.filename.to_s ] }
+    end
+
+    def remove_file(attachment)
+      attachment.purge_later
+      touch
+      audit "file removed", { "files" => [ attachment.filename.to_s, nil ] }
+    end
 
     private
       def assign_revision(attributes)

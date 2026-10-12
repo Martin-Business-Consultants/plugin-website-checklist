@@ -8,5 +8,6 @@ module WebsiteChecklist
     private
       def set_site = @site = Site.find(params[:site_id] || params[:id])
       def set_item = @item = @site.items.find(params[:item_id] || params[:id])
+      def set_recommendation = @recommendation = Recommendation.joins(:scan).where(scan: { site_id: @site.id }).find(params[:recommendation_id])
   end
 end
