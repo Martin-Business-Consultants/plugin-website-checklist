@@ -80,7 +80,7 @@ module WebsiteChecklist
                   website_pairs_fields(fields, webhook),
                   tag.div(class: "section-actions") do
                     tag.button(safe_join([ icon_tag("trash"), tag.span("Remove this webhook") ], " "), type: "button",
-                      class: "btn btn--plain txt-small", data: { action: "repeater#remove" })
+                      class: "btn txt-small", data: { action: "repeater#remove" })
                   end
                 ].compact)
               end
@@ -100,7 +100,7 @@ module WebsiteChecklist
             tag.div(safe_join(rows), class: "website-checklist-pairs", data: { repeater_target: "list" }),
             tag.template(website_pair_row(name, {}, "NEW_PAIR"), data: { repeater_target: "template" }),
             tag.div do
-              tag.button(safe_join([ icon_tag("add"), tag.span("Add a key") ], " "), type: "button", class: "btn btn--plain txt-small", data: { action: "repeater#add" })
+              tag.button(safe_join([ icon_tag("add"), tag.span("Add a key") ], " "), type: "button", class: "btn txt-small", data: { action: "repeater#add" })
             end
           ])
         end
