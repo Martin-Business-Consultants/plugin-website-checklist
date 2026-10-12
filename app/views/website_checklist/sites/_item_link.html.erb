@@ -1,0 +1,18 @@
+<%# locals: (item:, site:, current:) %>
+<%# One item in the checklist's list: its state as a dot, and a flag when something's wrong. Picking
+    it shows it on the right (sites/_item), replaced by ItemsController#update's turbo stream. %>
+<%= link_to website_checklist_site_path(site, item: item.id), id: dom_id(item, :link), class: "scope-nav__item",
+      aria: { current: ("page" if current) }, data: { turbo_frame: "website_checklist", turbo_action: "advance", filter_target: "item" } do %>
+  <span class="scope-nav__name">
+    <%= tag.span class: "website-checklist-dot website-checklist-dot--#{item.state}", title: item.state_label %>
+    <span class="overflow-ellipsis" title="<%= [ item.title, item.subject ].compact_blank.join(" · ") %>">
+      <%= item.title %>
+      <% if item.subject.present? %>
+        <span class="txt-subtle">· <%= item.subject %></span>
+      <% end %>
+    </span>
+  </span>
+  <% if item.problem.present? || item.differs_from_cms? %>
+    <span class="website-checklist-problem" title="Needs a look"><%= icon_tag "bell-alert" %></span>
+  <% end %>
+<% end %>

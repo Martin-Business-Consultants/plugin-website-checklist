@@ -1,45 +1,33 @@
 <%# locals: (item:, site:) %>
-<%# One checklist item: its value edits in place (a frame), its note in a modal. Replaced whole by
-    ItemsController#update's turbo stream, so its state follows a save. %>
-<li id="<%= dom_id(item) %>" class="website-checklist-item" data-filter-target="item">
-  <div class="website-checklist-item__head">
-    <div class="website-checklist-item__title">
-      <strong><%= item.title %></strong>
-      <% if item.subject.present? %>
-        <span class="txt-subtle">· <%= item.subject %></span>
-      <% end %>
-    </div>
-    <div class="website-checklist-item__actions txt-small">
+<%# The picked item, on the right of the site's page: what it is, what's known, and its value and
+    note to change. Replaced by ItemsController#update's turbo stream, so its state follows a save. %>
+<article class="flex flex-column gap" aria-label="<%= item.title %>">
+  <header class="flex flex-column gap-half">
+    <div class="website-checklist-item__head">
+      <h2 class="website-checklist-detail__title"><%= item.title %></h2>
       <%= website_item_state_tag item %>
-      <div class="display-contents" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-        <button type="button" class="<%= class_names("btn btn--circle borderless", "txt-subtle": item.note.blank?) %>" title="<%= item.note.present? ? "Note" : "Add a note" %>" data-action="dialog#open">
-          <%= icon_tag "comment" %>
-          <span class="for-screen-reader"><%= item.note.present? ? "Note" : "Add a note" %> on <%= item.title %></span>
-        </button>
-        <dialog class="dialog dialog--action panel fill-white shadow gap flex-column txt-align-start" data-dialog-target="dialog" aria-label="Note on <%= item.title %>">
-          <h3 class="dialog__title">Note · <%= item.title %></h3>
-          <%= form_with model: item, url: website_checklist_site_item_path(site, item), scope: :item, class: "flex flex-column gap-half" do |form| %>
-            <%= form.text_area :note, class: "input full-width", rows: 4, placeholder: "Who asked for it, where it was checked, the Search Console property…", aria: { label: "Note" } %>
-            <div class="dialog__actions">
-              <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-              <button type="submit" class="btn btn--link">Save note</button>
-            </div>
-          <% end %>
-        </dialog>
-      </div>
     </div>
-  </div>
-  <% if item.detail.present? %>
-    <p class="txt-x-small txt-subtle margin-none"><%= item.detail %></p>
+    <p class="txt-x-small txt-subtle margin-none"><%= [ item.group, item.subject ].compact_blank.join(" · ") %></p>
+    <% if item.detail.present? %>
+      <p class="txt-small margin-none"><%= item.detail %></p>
+    <% end %>
+  </header>
+
+  <% if item.problem.present? %>
+    <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> <%= item.problem %></p>
   <% end %>
+  <% if item.differs_from_cms? %>
+    <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> The CMS doesn't match: change it there, or the value here.</p>
+  <% end %>
+
   <dl class="record-facts txt-small">
     <dt>Value</dt>
-    <dd><%= render "website_checklist/items/value", item: item, site: site %></dd>
+    <dd class="<%= class_names("website-checklist-value", "txt-subtle": item.value.blank?) %>"><%= item.value.presence || "Not recorded" %></dd>
     <% if item.confirmed_value.present? && item.value.to_s != item.confirmed_value.to_s %>
       <dt>Was confirmed as</dt>
       <dd class="website-checklist-value"><%= item.confirmed_value %></dd>
     <% end %>
-    <% if item.differs_from_cms? %>
+    <% if item.detected? && site.cms_linked? %>
       <dt>The CMS says</dt>
       <dd class="website-checklist-value"><%= item.detected_value.presence || "Nothing" %></dd>
     <% end %>
@@ -48,21 +36,45 @@
       <dd><%= item.confirmed_by_name %>, <%= l item.confirmed_at.to_date, format: :long %></dd>
     <% end %>
   </dl>
-  <% if item.problem.present? %>
-    <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> <%= item.problem %></p>
+
+  <%= form_with model: item, url: website_checklist_site_item_path(site, item), scope: :item, namespace: dom_id(item), class: "record-form", data: { controller: "form" } do |form| %>
+    <% if item.custom? %>
+      <label class="record-form__field">
+        <span class="record-form__label">What to check</span>
+        <%= form.text_field :title, class: "input full-width", required: true, maxlength: 200, autocomplete: "off" %>
+      </label>
+      <label class="record-form__field">
+        <span class="record-form__label">Why it matters</span>
+        <%= form.text_field :detail, class: "input full-width", autocomplete: "off" %>
+      </label>
+    <% end %>
+
+    <label class="record-form__field">
+      <span class="record-form__label">Value</span>
+      <%= form.text_field :value, class: "input full-width", autocomplete: "off" %>
+      <span class="record-form__hint">What is true now. Saving confirms it as yours; empty, it's to confirm again.<%= " Saving here doesn't change the CMS." if item.detected? && site.cms_linked? %></span>
+    </label>
+
+    <label class="record-form__field">
+      <span class="record-form__label">Note</span>
+      <%= form.text_area :note, class: "input full-width", rows: 3, placeholder: "Who asked for it, where it was checked, the Search Console property…" %>
+    </label>
+
+    <div class="record-form__footer">
+      <button type="submit" class="btn btn--link" data-form-target="submit">
+        <span>Save</span>
+      </button>
+    </div>
   <% end %>
-  <% if item.differs_from_cms? %>
-    <p class="website-checklist-problem txt-small margin-none"><%= icon_tag "bell-alert" %> The CMS doesn't match: change it there, or edit the value here.</p>
-  <% end %>
+
   <% if item.href.present? || item.custom? %>
     <div class="website-checklist-item__actions txt-small">
       <% if item.href.present? %>
         <%= link_to "Open in the CMS", item.href, class: "txt-link", target: "_blank", rel: "noopener" %>
       <% end %>
       <% if item.custom? %>
-        <%= link_to "Rename", edit_website_checklist_site_item_path(site, item), class: "btn btn--plain txt-small" %>
         <%= render "layouts/shared/delete_dialog", name: "“#{item.title}”", path: website_checklist_site_item_path(site, item), trigger_class: "txt-small" %>
       <% end %>
     </div>
   <% end %>
-</li>
+</article>

@@ -14,7 +14,7 @@ module WebsiteChecklist
       assert_response :success
 
       patch website_checklist_site_item_path(@site, @item), params: { item: { value: "ann@acme.example; cc bob@acme.example" } }
-      assert_redirected_to website_checklist_site_path(@site, anchor: "website_checklist_item_#{@item.id}")
+      assert_redirected_to website_checklist_site_path(@site, item: @item.id)
       @item.reload
       assert_equal "confirmed", @item.state
       assert_equal "Sarah Staff", @item.confirmed_by_name
@@ -25,15 +25,11 @@ module WebsiteChecklist
       assert_nil @item.confirmed_value
     end
 
-    test "the value edits in its frame, and saving sends the whole item back" do
-      get edit_website_checklist_site_item_path(@site, @item), headers: { "Turbo-Frame" => "value_website_checklist_item_#{@item.id}" }
-      assert_response :success
-      assert_select "turbo-frame#value_website_checklist_item_#{@item.id} input[name='item[value]']"
-      assert_select "input[name='item[note]']", count: 0
-
+    test "saving on the site's page sends back the item and its row" do
       patch website_checklist_site_item_path(@site, @item), params: { item: { value: "ann@acme.example" } }, as: :turbo_stream
       assert_response :success
-      assert_match %(<turbo-stream action="replace" target="website_checklist_item_#{@item.id}">), response.body
+      assert_match %(<turbo-stream action="update" target="website_checklist_detail">), response.body
+      assert_match %(<turbo-stream action="replace" target="link_website_checklist_item_#{@item.id}">), response.body
       assert_match "Confirmed", response.body
       assert_match %(target="group_forms_website_checklist_site_#{@site.id}"), response.body
       assert_match "1 of 4 confirmed", response.body

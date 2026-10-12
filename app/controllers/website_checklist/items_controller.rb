@@ -16,19 +16,17 @@ module WebsiteChecklist
     def create
       item = Item.add_custom(@site, **params.expect(item: %i[title detail value note]).to_h.symbolize_keys)
       if item.persisted?
-        redirect_to website_checklist_site_path(@site, anchor: item_anchor(item)), notice: "Added “#{item.title}” to #{@site.name}."
+        redirect_to website_checklist_site_path(@site, item: item.id), notice: "Added “#{item.title}” to #{@site.name}."
       else
         redirect_to website_checklist_site_path(@site), alert: item.errors.full_messages.to_sentence
       end
     end
 
-    # From the value's frame on the site's page, just the field; otherwise the whole form.
     def edit
-      render :value_field if turbo_frame_request?
     end
 
     # A value saved is confirmed as the saver's (Item#record); a note or a custom item's title
-    # alone is only revised. The site's page gets the item back whole, its state and all.
+    # alone is only revised. The site's page gets the item back on the right, and its row in the list.
     def update
       attributes = params.expect(item: %i[value note title detail])
       saved = attributes.key?(:value) ? @item.record(attributes, by: Current.user) : @item.revise(attributes)
@@ -36,10 +34,10 @@ module WebsiteChecklist
       if saved
         respond_to do |format|
           format.turbo_stream
-          format.html { redirect_to website_checklist_site_path(@site, anchor: item_anchor(@item)), notice: "“#{@item.title}” saved." }
+          format.html { redirect_to website_checklist_site_path(@site, item: @item.id), notice: "“#{@item.title}” saved." }
         end
       else
-        render (turbo_frame_request? ? :value_field : :edit), formats: :html, status: :unprocessable_entity
+        render :edit, formats: :html, status: :unprocessable_entity
       end
     end
 
@@ -49,8 +47,5 @@ module WebsiteChecklist
       @item.destroy!
       redirect_to website_checklist_site_path(@site), notice: "Removed “#{@item.title}”."
     end
-
-    private
-      def item_anchor(item) = helpers.dom_id(item)
   end
 end

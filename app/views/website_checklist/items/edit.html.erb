@@ -1,7 +1,7 @@
 <% @page_title = @item.title %>
 
 <% content_for :header do %>
-  <%= parent_page @site.name, website_checklist_site_path(@site, anchor: dom_id(@item)) %>
+  <%= parent_page @site.name, website_checklist_site_path(@site, item: @item.id) %>
 <% end %>
 
 <section class="settings">
@@ -39,7 +39,7 @@
       </label>
 
       <div class="record-form__footer">
-        <%= link_to "Cancel", website_checklist_site_path(@site, anchor: dom_id(@item)), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
+        <%= link_to "Cancel", website_checklist_site_path(@site, item: @item.id), class: "btn btn--plain record-form__cancel", data: { form_target: "cancel" } %>
         <button type="submit" class="btn btn--link" data-form-target="submit">
           <span>Save</span>
         </button>

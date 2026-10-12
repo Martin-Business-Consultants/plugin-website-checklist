@@ -32,7 +32,7 @@ module WebsiteChecklist
 
     def show
       @items = @site.items.to_a
-      @open_all = params[:open] == "all"
+      @item = @items.find { it.id.to_s == params[:item].to_s } || @items.find { website_item_needs_look?(it) } || @items.first
     end
 
     def new
@@ -67,6 +67,8 @@ module WebsiteChecklist
     end
 
     private
+      def website_item_needs_look?(item) = item.state.in?(%w[unconfirmed changed]) || item.problem.present?
+
       def site_params = params.expect(site: %i[client_id name url cms_url cms_token])
   end
 end

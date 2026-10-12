@@ -32,11 +32,12 @@ Then switch it on in Settings › Plugins. Remove deletes its code and keeps its
     receiving data
   - Launch: domain and HTTPS, client sign-off
   - Custom: anything else the team adds.
-- **Editing in place**: click an item's value to edit it right there; saving confirms it as yours
-  (your name and the time are kept, with the value as confirmed), and emptying it puts it back
-  to confirm. If the value changes later, what was confirmed shows as "was confirmed as". The
-  comment icon on each item opens its note. Groups fold away, the first open; the expand icon
-  at the top opens them all. (Agents can still confirm, mark not applicable and reopen.)
+- **A list and the item beside it**: a site's page lists its checklist on the left, each item
+  with a dot for its state; pick one and it opens on the right with what's known about it and its
+  value and note to change. Saving a value confirms it as yours (your name and the time are kept,
+  with the value as confirmed), and emptying it puts it back to confirm. If the value changes
+  later, what was confirmed shows as "was confirmed as". The site's client, address and CMS sit
+  in one line under its name. (Agents can still confirm, mark not applicable and reopen.)
 - **Read from the CMS** (optional): give a site its LibrePublish CMS address and an API token,
   and "Read the CMS" (and a nightly run) fills in what the CMS can tell: the from name and email,
   each published form's notification recipients, notification and confirmation wording (subject

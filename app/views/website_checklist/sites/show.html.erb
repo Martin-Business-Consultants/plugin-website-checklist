@@ -5,96 +5,89 @@
   <%= parent_page "Websites", website_checklist_sites_path %>
 <% end %>
 
-<section class="settings settings--split">
-  <div class="settings__panel panel shadow txt-align-start">
-    <div class="page-heading">
-      <h1 class="page-title"><%= @page_title %></h1>
-      <div class="page-heading__actions">
-        <% if @open_all %>
-          <%= link_to website_checklist_site_path(@site), class: "btn btn--circle", title: "Close all but the first" do %>
-            <%= icon_tag "collapse" %>
-            <span class="for-screen-reader">Close all but the first</span>
+<%# The checklist on the left, the picked item on the right: picking one reloads only this frame,
+    so the page stays where it was scrolled. %>
+<turbo-frame id="website_checklist" target="_top">
+  <section class="settings settings--split website-checklist-split">
+    <div class="settings__panel panel shadow txt-align-start">
+      <div class="page-heading">
+        <h1 class="page-title"><%= @page_title %></h1>
+        <div class="page-heading__actions">
+          <% if @site.cms_linked? %>
+            <%= button_to website_checklist_site_sync_path(@site), class: "btn btn--circle-mobile" do %>
+              <%= icon_tag "refresh" %>
+              <span>Read the CMS</span>
+            <% end %>
           <% end %>
-        <% else %>
-          <%= link_to website_checklist_site_path(@site, open: "all"), class: "btn btn--circle", title: "Open all" do %>
-            <%= icon_tag "expand" %>
-            <span class="for-screen-reader">Open all</span>
+          <% if can?(:manage_websites) %>
+            <%= link_to edit_website_checklist_site_path(@site), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
+              <%= icon_tag "pencil" %>
+              <span>Edit</span>
+              <kbd class="hide-on-touch">E</kbd>
+            <% end %>
           <% end %>
-        <% end %>
-        <% if @site.cms_linked? %>
-          <%= button_to website_checklist_site_sync_path(@site), class: "btn btn--circle-mobile" do %>
-            <%= icon_tag "refresh" %>
-            <span>Read the CMS</span>
-          <% end %>
-        <% end %>
-        <% if can?(:manage_websites) %>
-          <%= link_to edit_website_checklist_site_path(@site), class: "btn btn--circle-mobile", data: { keys: "e" } do %>
-            <%= icon_tag "pencil" %>
-            <span>Edit</span>
-            <kbd class="hide-on-touch">E</kbd>
-          <% end %>
-        <% end %>
+        </div>
       </div>
-    </div>
 
-    <% if @site.sync_error.present? %>
-      <div class="website-checklist-alert txt-small" role="status">
-        <strong>Some of the CMS couldn't be read</strong>
-        <div class="website-checklist-value"><%= @site.sync_error %></div>
-      </div>
-    <% end %>
-
-    <% groups = website_item_groups(@items) %>
-
-    <% groups.each_with_index do |(group, items), index| %>
-      <%# herb:key group %>
-      <%= tag.details class: "website-checklist-group settings__section", open: @open_all || index.zero? do %>
-        <summary class="website-checklist-group__summary">
-          <%= icon_tag "caret-down", class: "website-checklist-group__caret" %>
-          <h2 class="divider"><%= group %></h2>
-          <%= render "website_checklist/sites/group_summary", site: @site, group: group, items: items %>
-        </summary>
-        <ul class="website-checklist-items">
-          <% items.each do |item| %>
-            <%# herb:key item.id %>
-            <%= render "website_checklist/sites/item", item: item, site: @site %>
-          <% end %>
-        </ul>
-      <% end %>
-    <% end %>
-  </div>
-
-  <aside class="settings__panel settings__panel--side panel shadow txt-align-start">
-    <%= render "layouts/shared/sidebar_toggle" %>
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Details</h2>
-      </header>
-      <dl class="record-facts">
-        <dt><%= term(:client) %></dt><dd><%= link_to @site.client.name, client_path(@site.client, tab: "plugin-website_checklist"), class: "txt-link" %></dd>
-        <dt>Address</dt><dd><%= @site.url ? link_to(@site.host, @site.url, class: "txt-link", target: "_blank", rel: "noopener") : "Not set" %></dd>
+      <div class="record-meta txt-small">
         <%= render "website_checklist/sites/checklist_summary", site: @site, summary: summary %>
-        <dt>Kept</dt>
-        <dd>
+        <%= link_to @site.client.name, client_path(@site.client, tab: "plugin-website_checklist"), class: "txt-link" %>
+        <% if @site.url %>
+          <%= link_to @site.host, @site.url, class: "txt-link", target: "_blank", rel: "noopener" %>
+        <% end %>
+        <span>
           <% if @site.cms_linked? %>
             From <%= link_to URI.parse(@site.cms_url).host, @site.cms_url, class: "txt-link", target: "_blank", rel: "noopener" %>,
             <%= @site.synced_at ? "read #{time_ago_in_words(@site.synced_at)} ago" : "not read yet" %>
           <% else %>
-            By hand
+            Kept by hand
           <% end %>
-        </dd>
-      </dl>
-    </section>
+        </span>
+      </div>
 
-    <section class="settings__section flex flex-column gap-half">
-      <header>
-        <h2 class="divider">Add an item</h2>
-      </header>
-      <%= form_with url: website_checklist_site_items_path(@site), scope: :item, class: "flex flex-column gap-half txt-small" do |form| %>
-        <%= form.text_field :title, class: "input full-width", placeholder: "What to check", required: true, maxlength: 200, autocomplete: "off", aria: { label: "What to check" } %>
-        <%= form.text_field :value, class: "input full-width", placeholder: "Its value, if you know it", autocomplete: "off", aria: { label: "Value" } %>
-        <button type="submit" class="btn txt-small">Add</button>
+      <% if @site.sync_error.present? %>
+        <div class="website-checklist-alert txt-small" role="status">
+          <strong>Some of the CMS couldn't be read</strong>
+          <div class="website-checklist-value"><%= @site.sync_error %></div>
+        </div>
       <% end %>
-    </section>
-  </aside>
-</section>
+
+      <% website_item_groups(@items).each do |group, items| %>
+        <%# herb:key group %>
+        <section class="settings__section flex flex-column gap-half">
+          <header class="website-checklist-group__header">
+            <h2 class="divider"><%= group %></h2>
+            <%= render "website_checklist/sites/group_summary", site: @site, group: group, items: items %>
+          </header>
+          <nav class="scope-nav" aria-label="<%= group %>">
+            <% items.each do |item| %>
+              <%# herb:key item.id %>
+              <%= render "website_checklist/sites/item_link", item: item, site: @site, current: item == @item %>
+            <% end %>
+          </nav>
+        </section>
+      <% end %>
+
+      <div class="section-actions">
+        <details class="website-checklist-add">
+          <summary class="btn txt-small"><%= icon_tag "add" %> <span>Add an item</span></summary>
+          <%= form_with url: website_checklist_site_items_path(@site), scope: :item, class: "flex flex-column gap-half txt-small" do |form| %>
+            <%= form.text_field :title, class: "input full-width", placeholder: "What to check", required: true, maxlength: 200, autocomplete: "off", autofocus: true, aria: { label: "What to check" } %>
+            <%= form.text_field :value, class: "input full-width", placeholder: "Its value, if you know it", autocomplete: "off", aria: { label: "Value" } %>
+            <div>
+              <button type="submit" class="btn btn--link txt-small">Add</button>
+            </div>
+          <% end %>
+        </details>
+      </div>
+    </div>
+
+    <div id="website_checklist_detail" class="settings__panel panel shadow txt-align-start website-checklist-detail">
+      <% if @item %>
+        <%= render "website_checklist/sites/item", item: @item, site: @site %>
+      <% else %>
+        <p class="txt-small txt-subtle margin-none">Pick an item on the left to see and change it.</p>
+      <% end %>
+    </div>
+  </section>
+</turbo-frame>

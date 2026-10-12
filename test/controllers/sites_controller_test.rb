@@ -45,16 +45,18 @@ module WebsiteChecklist
       assert_response :success
       assert_includes response.body, "Sitemap submitted to Google Search Console"
       assert_includes response.body, "Admin notification goes to (to and CCs)"
-      assert_select "details.website-checklist-group", count: response.body.scan("website-checklist-group ").size
-      assert_select "details.website-checklist-group[open]", 1
-      assert_select "a[href=?][title='Open all']", website_checklist_site_path(@site, open: "all")
-      assert_select "turbo-frame[id^='value_website_checklist_item_'] a.website-checklist-editable"
-      assert_select "dialog textarea[name='item[note]']"
+      assert_select "#website_checklist_detail", 1
+      assert_select "aside.settings__panel--side", 0
+      assert_select "nav.scope-nav a[aria-current='page']", 1
+      assert_select "#website_checklist_detail input[name='item[value]']"
+      assert_select "#website_checklist_detail textarea[name='item[note]']"
       assert_select "form[action$='/confirmation']", count: 0
       assert_select "form[action$='/not_applicable']", count: 0
 
-      get website_checklist_site_path(@site, open: "all")
-      assert_select "details.website-checklist-group:not([open])", 0
+      item = @site.items.find_by!(key: "forms:any:notification")
+      get website_checklist_site_path(@site, item: item.id)
+      assert_select "a#link_website_checklist_item_#{item.id}[aria-current='page']"
+      assert_select "#website_checklist_detail h2", item.title
 
       get website_checklist_site_path(@site, format: :json)
       body = response.parsed_body
@@ -113,7 +115,7 @@ module WebsiteChecklist
       perform_enqueued_jobs { post website_checklist_site_sync_path(@site) }
       assert_equal "Acme", @site.items.find_by!(key: "sender:from_name").value
 
-      get website_checklist_site_path(@site)
+      get website_checklist_site_path(@site, item: @site.items.find_by!(key: "forms:contact:notification").id)
       assert_includes response.body, "Open in the CMS"
       assert_includes response.body, "ann@acme.example, bob@acme.example"
     end
