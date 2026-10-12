@@ -34,10 +34,13 @@ module WebsiteChecklist
 
     after_create :apply_standard_checklist
 
-    scope :ordered, -> { order(:name) }
+    # By address, A to Z, without its scheme or a leading "www."; those without one last, by name.
+    ADDRESS = "LOWER(REPLACE(REPLACE(url, 'https://', ''), 'http://', ''))"
+    scope :ordered, -> { order(Arel.sql("url IS NULL, CASE WHEN #{ADDRESS} LIKE 'www.%' THEN SUBSTR(#{ADDRESS}, 5) ELSE #{ADDRESS} END, name")) }
 
+    # The address's host, without a leading "www.".
     def host
-      URI.parse(url.to_s).host || url
+      (URI.parse(url.to_s).host || url)&.delete_prefix("www.")
     rescue URI::InvalidURIError
       url
     end

@@ -23,6 +23,16 @@ module WebsiteChecklist
       assert site.errors[:url].any?
     end
 
+    test "sites list by address, A to Z, ignoring www.; those without one last" do
+      zeta = Site.create!(client: @client, name: "A", url: "https://zeta.example")
+      none = Site.create!(client: @client, name: "B")
+      beta = Site.create!(client: @client, name: "C", url: "http://www.beta.example")
+      alpha = Site.create!(client: @client, name: "D", url: "https://alpha.example")
+
+      assert_equal [ alpha, beta, zeta, none ], Site.where(id: [ zeta, none, beta, alpha ]).ordered.to_a
+      assert_equal "beta.example", beta.host
+    end
+
     test "the summary counts what applies and is ready when all of it is confirmed without problems" do
       site = Site.create!(client: @client, name: "Main")
       ted = users(:ted)

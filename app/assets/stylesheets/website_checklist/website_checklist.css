@@ -84,23 +84,13 @@
     inline-size: 0.5em;
   }
 
-  .website-checklist-dot--confirmed { background-color: oklch(var(--lch-green-medium)); }
-
-  /* A confirmed step: a green check in place of the dot, and the row tinted green. */
-  .website-checklist-check {
-    align-items: center;
+  /* Confirmed, or approved: the dot lit green, with a soft glow. */
+  .website-checklist-dot--confirmed,
+  .website-checklist-dot--approved {
     background-color: oklch(var(--lch-green-medium));
-    block-size: 1.15em;
-    border-radius: 50%;
-    color: var(--color-canvas);
-    display: inline-flex;
-    flex-shrink: 0;
-    inline-size: 1.15em;
-    justify-content: center;
-
-    .icon {
-      --icon-size: 0.75em;
-    }
+    box-shadow:
+      0 0 0 0.15em oklch(var(--lch-green-medium) / 20%),
+      0 0 0.6em 0.1em oklch(var(--lch-green-medium) / 55%);
   }
 
   .scope-nav__item.website-checklist-link--confirmed {
@@ -118,8 +108,9 @@
     color: oklch(var(--lch-green-dark));
     display: inline-flex;
     font-weight: 600;
-    gap: 0.25em;
+    gap: 0.5em;
   }
+
   .website-checklist-dot--changed { background-color: var(--color-negative); }
   .website-checklist-dot--not_applicable { background-color: var(--color-ink-lighter); }
 
