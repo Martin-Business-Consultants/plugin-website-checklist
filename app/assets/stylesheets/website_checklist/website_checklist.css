@@ -395,10 +395,16 @@
       padding-inline: 0.75em;
     }
 
+    /* Round buttons keep the core's grid (the icon sized from the button): only their size. */
     .btn.btn--circle {
-      inline-size: var(--website-checklist-control-height);
-      justify-content: center;
+      --btn-size: var(--website-checklist-control-height);
+
       padding-inline: 0;
+    }
+
+    /* The bulk bar's pills keep their own width beside each other. */
+    .bulk-bar .input {
+      inline-size: auto;
     }
 
     @media (pointer: coarse) {
