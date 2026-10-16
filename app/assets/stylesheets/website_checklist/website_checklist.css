@@ -376,4 +376,35 @@
   .website-checklist-drop {
     min-block-size: 4.5rem;
   }
+
+  /* One size for every control on the page: buttons, fields and selects share a height, side
+     padding and text size, so a field and its button line up. Text areas, the drop box and menu
+     entries keep their own. On touch screens fields keep 16px text, so phones don't zoom in. */
+  :is(.website-checklist-split, .website-checklist-sheet) {
+    --website-checklist-control-height: 2.25rem;
+
+    :is(.btn, input.input, select.input, label.input):not(.input--upload, .popup__btn, textarea) {
+      block-size: var(--website-checklist-control-height);
+      box-sizing: border-box;
+      font-size: var(--text-small);
+      line-height: 1.2;
+      padding-block: 0;
+    }
+
+    :is(.btn, input.input, label.input):not(.input--upload, .popup__btn, .btn--circle, .input--select) {
+      padding-inline: 0.75em;
+    }
+
+    .btn.btn--circle {
+      inline-size: var(--website-checklist-control-height);
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    @media (pointer: coarse) {
+      :is(input.input, select.input, label.input input) {
+        font-size: max(16px, var(--text-small));
+      }
+    }
+  }
 }
