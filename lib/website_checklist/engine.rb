@@ -39,7 +39,7 @@ module WebsiteChecklist
 
     config.to_prepare do
       Runwell::Plugins.register :website_checklist, name: "Websites", version: WebsiteChecklist::VERSION,
-        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.24.0",
+        author: "Martin Business Consultants", enabled_by_default: false, requires: ">= 2.29.0",
         homepage: "https://github.com/Martin-Business-Consultants/plugin-website-checklist",
         description: "Every client's websites, each with a step-by-step checklist to take it live: access to the " \
                      "domain, DNS, Search Console and Analytics first, then forms and email, launch and after launch, " \

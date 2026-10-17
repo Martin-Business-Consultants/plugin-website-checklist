@@ -47,18 +47,19 @@ module WebsiteChecklist
 
     def website_client_options = Client.ordered.pluck(:name, :id)
 
-    # The Webhooks step's fields, inside the item's form: a repeater (the core's `repeater`
-    # controller) of webhooks, each an accordion with its name, address and keys and values.
+    # The Webhooks step's fields, inside the item's form: a repeater (the plugin's own
+    # `website-checklist--repeater` controller) of webhooks, each an accordion with its name,
+    # address and keys and values.
     # Built here rather than in partials, which can't render inside form_with.
     def website_webhooks_fields(form, item)
       rows = item.webhooks.each_with_index.map { |webhook, index| website_webhook_row(form, webhook, index) }
-      tag.div class: "website-checklist-webhooks", data: { controller: "repeater", repeater_placeholder_value: "NEW_WEBHOOK" } do
+      tag.div class: "website-checklist-webhooks", data: { controller: "website-checklist--repeater", "website-checklist--repeater-placeholder-value": "NEW_WEBHOOK" } do
         safe_join([
           hidden_field_tag("#{form.object_name}[webhooks_attributes][-1][name]", "", id: nil),
-          tag.div(safe_join(rows), class: "website-checklist-webhooks__list", data: { repeater_target: "list" }),
-          tag.template(website_webhook_row(form, Webhook.new, "NEW_WEBHOOK", open: true), data: { repeater_target: "template" }),
+          tag.div(safe_join(rows), class: "website-checklist-webhooks__list", data: { "website-checklist--repeater-target": "list" }),
+          tag.template(website_webhook_row(form, Webhook.new, "NEW_WEBHOOK", open: true), data: { "website-checklist--repeater-target": "template" }),
           tag.div(class: "section-actions") do
-            tag.button(safe_join([ icon_tag("add"), tag.span("Add a webhook") ], " "), type: "button", class: "btn txt-small", data: { action: "repeater#add" })
+            tag.button(safe_join([ icon_tag("add"), tag.span("Add a webhook") ], " "), type: "button", class: "btn txt-small", data: { action: "website-checklist--repeater#add" })
           end
         ])
       end
@@ -91,7 +92,7 @@ module WebsiteChecklist
                   website_pairs_fields(fields, webhook),
                   tag.div(class: "section-actions") do
                     tag.button(safe_join([ icon_tag("trash"), tag.span("Remove this webhook") ], " "), type: "button",
-                      class: "btn txt-small", data: { action: "repeater#remove" })
+                      class: "btn txt-small", data: { action: "website-checklist--repeater#remove" })
                   end
                 ].compact)
               end
@@ -104,14 +105,14 @@ module WebsiteChecklist
       def website_pairs_fields(fields, webhook)
         name = "#{fields.object_name}[pairs]"
         rows = webhook.pairs.each_with_index.map { |pair, index| website_pair_row(name, pair, index) }
-        tag.div class: "record-form__field", data: { controller: "repeater", repeater_placeholder_value: "NEW_PAIR" } do
+        tag.div class: "record-form__field", data: { controller: "website-checklist--repeater", "website-checklist--repeater-placeholder-value": "NEW_PAIR" } do
           safe_join([
             tag.span("Keys and values", class: "record-form__label"),
             hidden_field_tag("#{name}[-1][key]", "", id: nil),
-            tag.div(safe_join(rows), class: "website-checklist-pairs", data: { repeater_target: "list" }),
-            tag.template(website_pair_row(name, {}, "NEW_PAIR"), data: { repeater_target: "template" }),
+            tag.div(safe_join(rows), class: "website-checklist-pairs", data: { "website-checklist--repeater-target": "list" }),
+            tag.template(website_pair_row(name, {}, "NEW_PAIR"), data: { "website-checklist--repeater-target": "template" }),
             tag.div do
-              tag.button(safe_join([ icon_tag("add"), tag.span("Add a key") ], " "), type: "button", class: "btn txt-small", data: { action: "repeater#add" })
+              tag.button(safe_join([ icon_tag("add"), tag.span("Add a key") ], " "), type: "button", class: "btn txt-small", data: { action: "website-checklist--repeater#add" })
             end
           ])
         end
@@ -123,7 +124,7 @@ module WebsiteChecklist
             text_field_tag("#{name}[#{index}][key]", pair["key"], id: nil, class: "input", autocomplete: "off", placeholder: "Key", aria: { label: "Key" }),
             text_field_tag("#{name}[#{index}][value]", pair["value"], id: nil, class: "input", autocomplete: "off", placeholder: "Value", aria: { label: "Value" }),
             tag.button(safe_join([ icon_tag("close"), tag.span("Remove", class: "for-screen-reader") ]), type: "button",
-              class: "btn btn--circle borderless txt-small", title: "Remove", data: { action: "repeater#remove" })
+              class: "btn btn--circle borderless txt-small", title: "Remove", data: { action: "website-checklist--repeater#remove" })
           ])
         end
       end

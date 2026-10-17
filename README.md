@@ -7,7 +7,7 @@ the Business Profile, Bing), then forms and email, the launch itself, and what f
 
 A Runwell plugin (Runwell's `docs/plugins.md`): a Rails engine that owns its `website_checklist_*`
 tables, reaches clients by id, and extends the core only through the plugin contract. Needs
-Runwell 2.24 or newer.
+Runwell 2.29 or newer.
 
 ## Install
 

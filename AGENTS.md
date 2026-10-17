@@ -44,7 +44,9 @@ Read first, in Runwell's repository:
   `unconfirmed`, `confirmed`, `not_applicable`; `confirmed_value` is what was confirmed.
 - The Webhooks step (`Item#webhooks?`) records `Webhook`s (name, url, `pairs` of keys and values)
   through nested attributes; its value is them written out. The form is a repeater over the
-  core's `repeater` Stimulus controller, built in `SitesHelper` (partials can't render in a form).
+  plugin's own `website-checklist--repeater` Stimulus controller
+  (`app/javascript/website_checklist/controllers/repeater_controller.js`), built in `SitesHelper`
+  (partials can't render in a form).
 - Every change is audited (`Audited`, included in `Site`, `Item` and `Webhook`): an `Audit` per
   create, update and delete with the changed fields' before and after as people read them, who
   (`Current.user`, `Current.source`, the token's name) and the site, written in the save's
